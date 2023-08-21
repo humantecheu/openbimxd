@@ -15,7 +15,7 @@ ext_modules = []
 
 # Call the setup.py
 setup(
-    name="openbimtools",
+    name="openbimxd",
     version="0.00",
     author="Mahdi Chamseddine, Fabian Kaufmann",
     author_email="mahdi.chamseddine@dfki.de, kaufmann@rptu.de",
