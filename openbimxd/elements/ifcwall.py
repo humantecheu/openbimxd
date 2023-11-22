@@ -3,16 +3,20 @@ from ifcopenshell.api import run
 from ifcopenshell import util
 
 
-# wall: length, thickness, translate object placement
-
-
 class IfcWall:
     def __init__(self, ifc_model) -> None:
+        """initialize IfcWall object. Creates an empty IfcWall in the IFC model
+        given as input.
+
+        Args:
+            ifc_model (ifcfile): The IFC file the IfcWall will be added to
+        """
         self.wall = run("root.create_entity", ifc_model.model, ifc_class="IfcWall")
         self.ifc_model = ifc_model
+        self.matrix = None
 
     def create_wall(self, bx):
-        """Creates IfcWalls
+        """Creates IfcWalls from a bounding box
 
         Args:
             bx (bbox): bounding box that holds the wall's geometry
@@ -85,8 +89,9 @@ class IfcWall:
             matrix=matrix,
             is_si=True,
         )
+        self.matrix = matrix
 
-        # Add a new wall-like body geometry, 5 meters long, 3 meters high, and 200mm thick
+        # Add a new wall-like body geometry with bounding box dimensions
         representation = run(
             "geometry.add_wall_representation",
             self.ifc_model.model,
