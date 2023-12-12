@@ -127,9 +127,32 @@ def door_test():
     ifc_model.write()
 
 
+def parse_bounding_boxes(ifc_fname):
+    # open file
+    ifc_model = ifcopenshell.open(ifc_fname)
+    walls = ifc_model.by_type("IfcWall")
+    print(walls)
+    # extract the shape and vertices of the wall
+    for wall in walls:
+        settings = ifcopenshell.geom.settings()
+        settings.set(settings.USE_WORLD_COORDS, True)
+        shape = ifcopenshell.geom.create_shape(settings, wall)
+        verts = np.asarray(shape.geometry.verts)
+        # generate a bbox from the vertices
+        ifc_bx = bbox.BBox()
+        ifc_bx.bbox_from_verts(verts)
+
+        visu = visualization.Visualization()
+        visu.bbox_geometry(ifc_bx)
+        visu.visualize()
+
+    pass
+
+
 def main():
-    walls_test(30)
-    door_test()
+    # walls_test(30)
+    # door_test()
+    parse_bounding_boxes("HT_DFKI_BA3_4thfloor.ifc")
 
 
 if __name__ == "__main__":
