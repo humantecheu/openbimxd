@@ -1,4 +1,6 @@
 import numpy as np
+import open3d as o3d
+
 import ifcopenshell
 import ifcopenshell.geom
 
@@ -132,6 +134,11 @@ def parse_bounding_boxes(ifc_fname):
     ifc_model = ifcopenshell.open(ifc_fname)
     walls = ifc_model.by_type("IfcWall")
     print(walls)
+    # open point cloud
+    pcd = o3d.io.read_point_cloud("/home/kaufmann/openbimxd/DFKI_4th_floor.ply")
+    pcd_points = np.asarray(pcd.points)
+    print(pcd_points.shape)
+    visu = visualization.Visualization()
     # extract the shape and vertices of the wall
     for wall in walls:
         settings = ifcopenshell.geom.settings()
@@ -141,9 +148,11 @@ def parse_bounding_boxes(ifc_fname):
         # generate a bbox from the vertices
         ifc_bx = bbox.BBox()
         ifc_bx.bbox_from_verts(verts)
+        wall_pts = ifc_bx.points_in_BBox(np.asarray(pcd.points))
 
-        visu = visualization.Visualization()
         visu.bbox_geometry(ifc_bx)
+        visu.point_cloud_geometry(wall_pts)
+
         visu.visualize()
 
     pass

@@ -6,6 +6,12 @@ __pycache__/
 # Test IFC files
 *.ifc
 
+# Test point clouds
+*.ply
+*.e57
+*.las
+*.laz
+
 # C extensions
 *.so
 
