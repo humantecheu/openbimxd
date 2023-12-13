@@ -15,3 +15,5 @@ set up virtual environment
 
 
 # ToDos
+
+- [ ] fix bbox from verts

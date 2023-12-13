@@ -6,6 +6,7 @@ import ifcopenshell.geom
 
 from openbimxd.ifcfile import ifcfile
 from openbimxd.elements import ifcwall, ifcdoor
+from openbimxd.ifctolabel import ifctolabel
 
 from pystruct3d.bbox import bbox
 from pystruct3d.visualization import visualization
@@ -129,39 +130,23 @@ def door_test():
     ifc_model.write()
 
 
-def parse_bounding_boxes(ifc_fname):
-    # open file
-    ifc_model = ifcopenshell.open(ifc_fname)
-    walls = ifc_model.by_type("IfcWall")
-    print(walls)
-    # open point cloud
-    pcd = o3d.io.read_point_cloud("/home/kaufmann/openbimxd/DFKI_4th_floor.ply")
-    pcd_points = np.asarray(pcd.points)
-    print(pcd_points.shape)
-    visu = visualization.Visualization()
-    # extract the shape and vertices of the wall
-    for wall in walls:
-        settings = ifcopenshell.geom.settings()
-        settings.set(settings.USE_WORLD_COORDS, True)
-        shape = ifcopenshell.geom.create_shape(settings, wall)
-        verts = np.asarray(shape.geometry.verts)
-        # generate a bbox from the vertices
-        ifc_bx = bbox.BBox()
-        ifc_bx.bbox_from_verts(verts)
-        wall_pts = ifc_bx.points_in_BBox(np.asarray(pcd.points))
-
-        visu.bbox_geometry(ifc_bx)
-        visu.point_cloud_geometry(wall_pts)
-
-        visu.visualize()
-
-    pass
+def test_ifc_to_label():
+    get_labels = ifctolabel.IfcToLabel(
+        "HT_DFKI_BA3_4thfloor.ifc", "DFKI_4th_floor.ply", 0.2
+    )
+    get_labels.parse_curtain()
+    get_labels.visualize()
+    get_labels.parse_doors()
+    get_labels.visualize()
+    get_labels.parse_walls()
+    get_labels.parse_windows()
+    get_labels.visualize()
 
 
 def main():
     # walls_test(30)
     # door_test()
-    parse_bounding_boxes("HT_DFKI_BA3_4thfloor.ifc")
+    test_ifc_to_label()
 
 
 if __name__ == "__main__":
