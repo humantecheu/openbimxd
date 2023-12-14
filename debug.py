@@ -6,7 +6,6 @@ import ifcopenshell.geom
 
 from openbimxd.ifcfile import ifcfile
 from openbimxd.elements import ifcwall, ifcdoor
-from openbimxd.ifctolabel import ifctolabel
 
 from pystruct3d.bbox import bbox
 from pystruct3d.visualization import visualization
@@ -130,23 +129,9 @@ def door_test():
     ifc_model.write()
 
 
-def test_ifc_to_label():
-    get_labels = ifctolabel.IfcToLabel(
-        "HT_DFKI_BA3_4thfloor.ifc", "DFKI_4th_floor.ply", 0.2
-    )
-    get_labels.parse_curtain()
-    get_labels.visualize()
-    get_labels.parse_doors()
-    get_labels.visualize()
-    get_labels.parse_walls()
-    get_labels.parse_windows()
-    get_labels.visualize()
-
-
 def main():
     # walls_test(30)
-    # door_test()
-    test_ifc_to_label()
+    door_test()
 
 
 if __name__ == "__main__":

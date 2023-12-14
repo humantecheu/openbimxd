@@ -16,4 +16,4 @@ set up virtual environment
 
 # ToDos
 
-- [ ] fix bbox from verts
+- [ ] fix bbox from verts: bounding box around sub elements, check verts with visualization

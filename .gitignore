@@ -11,6 +11,8 @@ __pycache__/
 *.e57
 *.las
 *.laz
+*.asc
+*.txt
 
 # C extensions
 *.so
