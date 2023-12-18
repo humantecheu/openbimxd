@@ -5,7 +5,7 @@ import ifcopenshell
 import ifcopenshell.geom
 
 from openbimxd.ifcfile import ifcfile
-from openbimxd.elements import ifcwall, ifcdoor
+from openbimxd.elements import ifcwall, ifcdoor, ifccolumn
 
 from pystruct3d.bbox import bbox
 from pystruct3d.visualization import visualization
@@ -62,7 +62,7 @@ def walls_test(test_angle):
 
 def door_test():
     # rotation matrix
-    angle = np.deg2rad(30)
+    angle = np.deg2rad(179)
     axis = np.array([0, 0, 1])
     c = np.cos(angle)
     s = np.sin(angle)
@@ -91,7 +91,7 @@ def door_test():
             [0.0, 1.0, 3.0],
         ]
     )
-    wall_points += np.array([1, 2, 0])
+    wall_points += np.array([2, 3, 0])
     wall_points = np.dot(wall_points, rot_mat.T)
     wall_bx = bbox.BBox(wall_points)
     # wall_bx.rotate(30)
@@ -109,7 +109,7 @@ def door_test():
             [1.0, 1.0, 2.0],
         ]
     )
-    door_points += np.array([1, 2, 0])
+    door_points += np.array([2, 3, 0])
     door_points = np.dot(door_points, rot_mat.T)
     door_box = bbox.BBox(door_points)
     door_box.order_points()
@@ -129,9 +129,30 @@ def door_test():
     ifc_model.write()
 
 
+def column_test():
+    ifc_model = ifcfile.IfcModelBuilder("my_file.ifc", "my_project")
+    col_points = np.array(
+        [
+            [0.0, 0.0, 0.0],
+            [0.5, 0.0, 0.0],
+            [0.5, 0.5, 0.0],
+            [0.0, 0.5, 0.0],
+            [0.0, 0.0, 3.0],
+            [0.5, 0.0, 3.0],
+            [0.5, 0.5, 3.0],
+            [0.0, 0.5, 3.0],
+        ]
+    )
+    col_box = bbox.BBox(col_points)
+    ifc_col = ifccolumn.IfcColumn(ifc_model)
+    ifc_col.create(col_box, shape="round")
+    ifc_model.write()
+
+
 def main():
-    # walls_test(30)
-    door_test()
+    # walls_test(179.5)
+    # door_test()
+    column_test()
 
 
 if __name__ == "__main__":

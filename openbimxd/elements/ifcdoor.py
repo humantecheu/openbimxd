@@ -14,30 +14,14 @@ class IfcDoor:
         self.door = run("root.create_entity", ifc_model.model, ifc_class="IfcDoor")
         self.ifc_model = ifc_model
 
-    def create_door(self, wall, bx):
+    def create_door(self, wall, bx, uid=None):
         # Create a 4x4 identity matrix. This matrix is at the origin with no rotation.
 
+        # set uid if given
+        if uid is not None:
+            self.door.GlobalId = uid
+
         matrix = wall.matrix
-
-        # yaw = np.arctan2(matrix[:, 0][1], matrix[:, 0][0])
-        # print(f"Angle: {np.rad2deg(yaw)}")
-
-        # transform = np.eye(4)
-        # along_length = 0.5
-        # z_diff = 1.0
-        # transform[:, 3][0:3] = [
-        #     along_length * np.cos(yaw),
-        #     along_length * np.sin(yaw),
-        #     z_diff,
-        # ]
-
-        # matrix = np.dot(transform, matrix)
-
-        # print(matrix)
-
-        # TODO: translate local placement, relative to wall
-        # TODO: find the shortest vector between origin of wall placement
-        # and door box corner points
 
         placement_door_vectors = bx.corner_points - np.tile(matrix[:, 3][0:3], (8, 1))
         lengths = np.linalg.norm(placement_door_vectors, axis=1)
@@ -55,7 +39,7 @@ class IfcDoor:
 
         # Add a new wall-like body geometry with bounding box dimensions
         # representation is used for opening and door
-        representation = run(
+        opening_representation = run(
             "geometry.add_wall_representation",
             self.ifc_model.model,
             context=self.ifc_model.body,
@@ -63,6 +47,13 @@ class IfcDoor:
             height=float(bx.height()),
             thickness=float(bx.width()),
         )
+        # TODO: fix door representation, add generic door-style one
+        # door_representation = run(
+        #     "geometry.add_door_representation",
+        #     self.ifc_model.model,
+        #     context=self.ifc_model.body,
+        #     door_type="DOUBLE_SWING_RIGHT",
+        # )
         opening = run(
             "root.create_entity", self.ifc_model.model, ifc_class="IfcOpeningElement"
         )
@@ -72,7 +63,14 @@ class IfcDoor:
             "geometry.assign_representation",
             self.ifc_model.model,
             product=opening,
-            representation=representation,
+            representation=opening_representation,
+        )
+        # using box-style opening representation
+        run(
+            "geometry.assign_representation",
+            self.ifc_model.model,
+            product=self.door,
+            representation=opening_representation,
         )
         run(
             "void.add_opening", self.ifc_model.model, opening=opening, element=wall.wall

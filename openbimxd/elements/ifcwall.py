@@ -13,42 +13,43 @@ class IfcWall:
         """
         self.wall = run("root.create_entity", ifc_model.model, ifc_class="IfcWall")
         self.ifc_model = ifc_model
-        self.matrix = None
+        self.matrix = np.eye(4)
 
-    def create_wall(self, bx):
+    def create_wall(self, bx, uid=None):
         """Creates IfcWalls from a bounding box
 
         Args:
             bx (bbox): bounding box that holds the wall's geometry
+            uid (string): optional, to set uid according to reference data
         """
+        # set uid if given
+        if uid is not None:
+            self.wall.GlobalId = uid
         # Create a 4x4 identity matrix. This matrix is at the origin with no rotation.
         matrix = np.eye(4)
 
         # Rotate anti-clockwise around the Z axis (i.e. in plan).
         # Anti-clockwise is positive. Clockwise is negative.
-        if bx.angle() % 180 == 0:
+        if round(bx.angle(), 0) % 180 == 0:
             matrix = util.placement.rotation(0.0, "Z") @ matrix
-        elif bx.angle() % 90 == 0:
+        elif round(bx.angle(), 0) % 90 == 0:
             matrix = util.placement.rotation(90, "Z") @ matrix
         else:
             matrix = util.placement.rotation(bx.angle(), "Z") @ matrix
         # Set the X, Y, Z coordinates. Notice how we rotate first then translate.
         # This is because the rotation origin is always at 0, 0, 0.
-        if bx.angle() % 180 == 0:
+        if round(bx.angle(), 0) % 180 == 0:
             # find the point with min x and y of the lower points
             lower_points = bx.corner_points[:3]
             idx = np.where(
                 (lower_points[:, 0] == np.min(lower_points[:, 0]))
                 & (lower_points[:, 1] == np.min(lower_points[:, 1]))
             )
-            print(f"Minimum point index: {idx[0].size}")
             if idx[0].size != 0:
-                print("pick index with min x and min y")
                 matrix[:, 3][0:3] = bx.corner_points[idx]
             else:
-                print("use index 0")
                 matrix[:, 3][0:3] = bx.corner_points[0]
-        elif bx.angle() % 90 == 0:
+        elif round(bx.angle(), 0) % 90 == 0:
             # in this case, the origin of the local placement needs to
             # be at max x and min y
             lower_points = bx.corner_points[:3]
@@ -56,12 +57,9 @@ class IfcWall:
                 (lower_points[:, 0] == np.max(lower_points[:, 0]))
                 & (lower_points[:, 1] == np.min(lower_points[:, 1]))
             )
-            print(f"Minimum point index: {idx[0].size}")
             if idx[0].size != 0:
-                print("pick index with min x and min y")
                 matrix[:, 3][0:3] = bx.corner_points[idx]
             else:
-                print("use index 1")
                 matrix[:, 3][0:3] = bx.corner_points[1]
         # in any other cases the origin of the local placement can be found
         # using the minimum of x or y
