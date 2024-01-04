@@ -1,7 +1,7 @@
 import numpy as np
-import copy
 from ifcopenshell.api import run
 from ifcopenshell import util
+import ifcopenshell.geom
 
 
 class IfcDoor:
@@ -21,16 +21,9 @@ class IfcDoor:
         if uid is not None:
             self.door.GlobalId = uid
 
-        door_matrix = copy.deepcopy(wall.matrix)
-
-        placement_door_vectors = bx.corner_points - np.tile(
-            wall.matrix[:, 3][0:3], (8, 1)
-        )
-        lengths = np.linalg.norm(placement_door_vectors, axis=1)
-        # BUG: occassionally, wrong vector for placement translation chosen
-        # then offset of ifc geometry by bx.width()
-        door_matrix[:, 3][0:3] += placement_door_vectors[np.argmin(lengths)]
-
+        door_matrix = wall.matrix.copy()
+        # points are ordered, try to use 1st corner vector
+        door_matrix[:, 3][0:3] += bx.corner_points[0] - wall.matrix[:, 3][0:3]
         # Set our door's Object Placement using our matrix.
         # `is_si=True` states that we are using SI units instead of project units.
         run(
@@ -104,7 +97,12 @@ class IfcDoor:
             product=self.door,
         )
 
-        # for debugging
-        return np.argmin(lengths)
+    def get_verts(self):
+        # ifc geom settings for ifc box visualization
+        settings = ifcopenshell.geom.settings()
+        settings.set(settings.USE_WORLD_COORDS, True)
+        # retrieve shape
+        shape = ifcopenshell.geom.create_shape(settings, self.door)
+        verts = np.asarray(shape.geometry.verts)
 
-        pass
+        return verts

@@ -1,6 +1,7 @@
 import numpy as np
 from ifcopenshell.api import run
 from ifcopenshell import util
+import ifcopenshell.geom
 
 
 class IfcWall:
@@ -31,52 +32,9 @@ class IfcWall:
         # This is because the rotation origin is always at 0, 0, 0.
         # Rotate anti-clockwise around the Z axis (i.e. in plan).
         # Anti-clockwise is positive. Clockwise is negative.
-        if bx.angle() % 180 == 0:
-            matrix = util.placement.rotation(0.0, "Z") @ matrix
-        elif bx.angle() % 90 == 0:
-            matrix = util.placement.rotation(90, "Z") @ matrix
-        else:
-            matrix = util.placement.rotation(bx.angle(), "Z") @ matrix
-        # handle exceptions
-        if bx.angle() % 180 == 0:
-            # find the point with min x and y of the lower points
-            lower_points = bx.corner_points[:3]
-            idx = np.where(
-                (lower_points[:, 0] == np.min(lower_points[:, 0]))
-                & (lower_points[:, 1] == np.min(lower_points[:, 1]))
-            )
-            if idx[0].size != 0:
-                matrix[:, 3][0:3] = bx.corner_points[idx]
-            else:
-                matrix[:, 3][0:3] = bx.corner_points[0]
-        elif bx.angle() % 90 == 0:
-            # in this case, the origin of the local placement needs to
-            # be at max x and min y
-            lower_points = bx.corner_points[:3]
-            idx = np.where(
-                (lower_points[:, 0] == np.max(lower_points[:, 0]))
-                & (lower_points[:, 1] == np.min(lower_points[:, 1]))
-            )
-            if idx[0].size != 0:
-                matrix[:, 3][0:3] = bx.corner_points[idx]
-            else:
-                matrix[:, 3][0:3] = bx.corner_points[3]
-        # in any other cases the origin of the local placement can be found
-        # using the minimum of x or y
-        # Note, that numpy argmin and argmax return the first item found
-        # so this returns the lower point with the condition met
-        elif bx.angle() < 90:
-            idx = np.argmin(bx.corner_points[:, 1])
-            matrix[:, 3][0:3] = bx.corner_points[idx]
-        elif bx.angle() < 180:
-            idx = np.argmax(bx.corner_points[:, 0])
-            matrix[:, 3][0:3] = bx.corner_points[idx]
-        elif bx.angle() < 270:
-            idx = np.argmax(bx.corner_points[:, 1])
-            matrix[:, 3][0:3] = bx.corner_points[idx]
-        else:
-            idx = np.argmin(bx.corner_points[:, 0])
-            matrix[:, 3][0:3] = bx.corner_points[idx]
+        matrix = util.placement.rotation(bx.angle(), "Z") @ matrix
+        # points ordered, set placement to 1st corner point
+        matrix[:, 3][0:3] = bx.corner_points[0]
 
         # Set our wall's Object Placement using our matrix.
         # `is_si=True` states that we are using SI units instead of project units.
@@ -113,3 +71,13 @@ class IfcWall:
             relating_structure=self.ifc_model.storey,
             product=self.wall,
         )
+
+    def get_verts(self):
+        # ifc geom settings for ifc box visualization
+        settings = ifcopenshell.geom.settings()
+        settings.set(settings.USE_WORLD_COORDS, True)
+        # retrieve shape
+        shape = ifcopenshell.geom.create_shape(settings, self.wall)
+        verts = np.asarray(shape.geometry.verts)
+
+        return verts

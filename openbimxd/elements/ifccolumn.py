@@ -1,5 +1,6 @@
 import numpy as np
 import ifcopenshell
+import ifcopenshell.geom
 from ifcopenshell.api import run
 from ifcopenshell import util
 
@@ -74,3 +75,13 @@ class IfcColumn:
             relating_structure=self.ifc_model.storey,
             product=self.column,
         )
+
+    def get_verts(self):
+        # ifc geom settings for ifc box visualization
+        settings = ifcopenshell.geom.settings()
+        settings.set(settings.USE_WORLD_COORDS, True)
+        # retrieve shape
+        shape = ifcopenshell.geom.create_shape(settings, self.column)
+        verts = np.asarray(shape.geometry.verts)
+
+        return verts

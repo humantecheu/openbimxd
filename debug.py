@@ -56,6 +56,7 @@ def walls_test(test_angle):
     visu = visualization.Visualization()
     visu.bbox_geometry(bx)
     visu.bbox_geometry(ifc_bx, color=[1, 0.75, 0])
+    visu.points_geometry(bx.corner_points[0].reshape(1, 3))
     visu.visualize()
 
     print("------------------------")
@@ -155,8 +156,9 @@ def column_test():
 
 def main():
     # walls_test(90.0002257895)
-    for i in range(0, 185, 5):
-        door_test(i)
+    for i in range(0, 380, 10):
+        # door_test(i)
+        walls_test(i)
     # column_test()
 
 
