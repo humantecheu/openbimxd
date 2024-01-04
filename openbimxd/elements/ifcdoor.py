@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 from ifcopenshell.api import run
 from ifcopenshell import util
 
@@ -15,17 +16,20 @@ class IfcDoor:
         self.ifc_model = ifc_model
 
     def create_door(self, wall, bx, uid=None):
-        # Create a 4x4 identity matrix. This matrix is at the origin with no rotation.
-
+        print("-- creating IFC door")
         # set uid if given
         if uid is not None:
             self.door.GlobalId = uid
 
-        matrix = wall.matrix
+        door_matrix = copy.deepcopy(wall.matrix)
 
-        placement_door_vectors = bx.corner_points - np.tile(matrix[:, 3][0:3], (8, 1))
+        placement_door_vectors = bx.corner_points - np.tile(
+            wall.matrix[:, 3][0:3], (8, 1)
+        )
         lengths = np.linalg.norm(placement_door_vectors, axis=1)
-        matrix[:, 3][0:3] += placement_door_vectors[np.argmin(lengths)]
+        # BUG: occassionally, wrong vector for placement translation chosen
+        # then offset of ifc geometry by bx.width()
+        door_matrix[:, 3][0:3] += placement_door_vectors[np.argmin(lengths)]
 
         # Set our door's Object Placement using our matrix.
         # `is_si=True` states that we are using SI units instead of project units.
@@ -33,7 +37,7 @@ class IfcDoor:
             "geometry.edit_object_placement",
             self.ifc_model.model,
             product=self.door,
-            matrix=matrix,
+            matrix=door_matrix,
             is_si=True,
         )
 
@@ -79,7 +83,7 @@ class IfcDoor:
             "geometry.edit_object_placement",
             self.ifc_model.model,
             product=opening,
-            matrix=matrix,
+            matrix=door_matrix,
             is_si=True,
         )
 
@@ -99,5 +103,8 @@ class IfcDoor:
             relating_structure=self.ifc_model.storey,
             product=self.door,
         )
+
+        # for debugging
+        return np.argmin(lengths)
 
         pass

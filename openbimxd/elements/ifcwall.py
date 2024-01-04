@@ -27,18 +27,18 @@ class IfcWall:
             self.wall.GlobalId = uid
         # Create a 4x4 identity matrix. This matrix is at the origin with no rotation.
         matrix = np.eye(4)
-
+        # Set the X, Y, Z coordinates. Notice how we rotate first then translate.
+        # This is because the rotation origin is always at 0, 0, 0.
         # Rotate anti-clockwise around the Z axis (i.e. in plan).
         # Anti-clockwise is positive. Clockwise is negative.
-        if round(bx.angle(), 0) % 180 == 0:
+        if bx.angle() % 180 == 0:
             matrix = util.placement.rotation(0.0, "Z") @ matrix
-        elif round(bx.angle(), 0) % 90 == 0:
+        elif bx.angle() % 90 == 0:
             matrix = util.placement.rotation(90, "Z") @ matrix
         else:
             matrix = util.placement.rotation(bx.angle(), "Z") @ matrix
-        # Set the X, Y, Z coordinates. Notice how we rotate first then translate.
-        # This is because the rotation origin is always at 0, 0, 0.
-        if round(bx.angle(), 0) % 180 == 0:
+        # handle exceptions
+        if bx.angle() % 180 == 0:
             # find the point with min x and y of the lower points
             lower_points = bx.corner_points[:3]
             idx = np.where(
@@ -49,7 +49,7 @@ class IfcWall:
                 matrix[:, 3][0:3] = bx.corner_points[idx]
             else:
                 matrix[:, 3][0:3] = bx.corner_points[0]
-        elif round(bx.angle(), 0) % 90 == 0:
+        elif bx.angle() % 90 == 0:
             # in this case, the origin of the local placement needs to
             # be at max x and min y
             lower_points = bx.corner_points[:3]
@@ -60,7 +60,7 @@ class IfcWall:
             if idx[0].size != 0:
                 matrix[:, 3][0:3] = bx.corner_points[idx]
             else:
-                matrix[:, 3][0:3] = bx.corner_points[1]
+                matrix[:, 3][0:3] = bx.corner_points[3]
         # in any other cases the origin of the local placement can be found
         # using the minimum of x or y
         # Note, that numpy argmin and argmax return the first item found

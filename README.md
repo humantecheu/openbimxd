@@ -16,7 +16,8 @@ set up virtual environment
 
 # ToDos
 
+- [ ] generate levels
 - [X] fix bbox from verts: bounding box around sub elements, check verts with visualization
 - [X] implement columns
-- [ ] get centroid method as in bbox_from_verts
+- [X] get centroid method as in bbox_from_verts
 - [ ] add material and property sets

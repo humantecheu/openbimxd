@@ -24,6 +24,7 @@ def walls_test(test_angle):
             [0.0, 1.0, 3.0],
         ]
     )
+    sample_points += np.array([-10, -10, 0])
     bx = bbox.BBox(sample_points)
 
     print(f"Test angle: {test_angle}")
@@ -60,9 +61,9 @@ def walls_test(test_angle):
     print("------------------------")
 
 
-def door_test():
+def door_test(ang):
     # rotation matrix
-    angle = np.deg2rad(179)
+    angle = np.deg2rad(ang)  # problem at 180
     axis = np.array([0, 0, 1])
     c = np.cos(angle)
     s = np.sin(angle)
@@ -91,10 +92,10 @@ def door_test():
             [0.0, 1.0, 3.0],
         ]
     )
-    wall_points += np.array([2, 3, 0])
+    wall_points += np.array([-10, -10, 0])
     wall_points = np.dot(wall_points, rot_mat.T)
     wall_bx = bbox.BBox(wall_points)
-    # wall_bx.rotate(30)
+    # wall_bx.rotate(180)
     wall_bx.order_points()
 
     door_points = np.array(
@@ -109,9 +110,12 @@ def door_test():
             [1.0, 1.0, 2.0],
         ]
     )
-    door_points += np.array([2, 3, 0])
+    door_points += np.array([-10, -10, 0])
     door_points = np.dot(door_points, rot_mat.T)
     door_box = bbox.BBox(door_points)
+    door_box.order_points()
+    # door_box.rotate(180)
+    # door_box.project_into_parent(wall_bx)
     door_box.order_points()
 
     visu = visualization.Visualization()
@@ -150,9 +154,10 @@ def column_test():
 
 
 def main():
-    # walls_test(179.5)
-    # door_test()
-    column_test()
+    # walls_test(90.0002257895)
+    for i in range(0, 185, 5):
+        door_test(i)
+    # column_test()
 
 
 if __name__ == "__main__":
