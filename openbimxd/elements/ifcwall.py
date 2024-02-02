@@ -5,7 +5,7 @@ import ifcopenshell.geom
 
 
 class IfcWall:
-    def __init__(self, ifc_model) -> None:
+    def __init__(self, ifc_model, ifc_material=None) -> None:
         """initialize IfcWall object. Creates an empty IfcWall in the IFC model
         given as input.
 
@@ -14,6 +14,7 @@ class IfcWall:
         """
         self.wall = run("root.create_entity", ifc_model.model, ifc_class="IfcWall")
         self.ifc_model = ifc_model
+        self.ifc_material = ifc_material
         self.matrix = np.eye(4)
 
     def create_wall(self, bx, uid=None):
@@ -62,6 +63,29 @@ class IfcWall:
             self.ifc_model.model,
             product=self.wall,
             representation=representation,
+        )
+
+        # assign material
+        if self.ifc_material is not None:
+            run(
+                "material.assign_material",
+                self.ifc_model.model,
+                product=self.wall,
+                type="IfcMaterial",
+                material=self.ifc_material,
+            )
+        # assign property set
+        pset = run(
+            "pset.add_pset",
+            self.ifc_model.model,
+            product=self.wall,
+            name="Pset_WallCommon",
+        )
+        run(
+            "pset.edit_pset",
+            self.ifc_model.model,
+            pset=pset,
+            properties={"FireRating": "F60", "LoadBearing": True},
         )
 
         # Place our wall in the ground floor

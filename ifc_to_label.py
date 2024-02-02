@@ -28,6 +28,7 @@ def ifc_to_label(ifc_fname, pcd_fname, offset):
         )
     )
     print(point_cloud_array.shape)
+    get_labels.visualize()
     np.savetxt(f"{pcd_fname[:-4]}_labeled.asc", point_cloud_array)
 
 

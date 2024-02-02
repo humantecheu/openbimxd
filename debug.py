@@ -6,12 +6,30 @@ import ifcopenshell.geom
 
 from openbimxd.ifcfile import ifcfile
 from openbimxd.elements import ifcwall, ifcdoor, ifccolumn
+from openbimxd.ifcmaterial import ifcmaterial
 
 from pystruct3d.bbox import bbox
 from pystruct3d.visualization import visualization
 
 
 def walls_test(test_angle):
+    # rotation matrix
+    print(f"Test angle: {test_angle}")
+    angle = np.deg2rad(test_angle)
+    axis = np.array([0, 0, 1])
+    c = np.cos(angle)
+    s = np.sin(angle)
+    t = 1 - c
+    axis = axis / np.linalg.norm(axis)
+    x, y, z = axis
+    # fmt:off
+    rot_mat = np.array(
+        [
+            [t * x**2 + c, t * x * y - s * z, t * x * z + s * y],
+            [t * x * y + s * z, t * y**2 + c, t * y * z - s * x],
+            [t * x * z - s * y, t * y * z + s * x, t * z**2 + c],
+        ]
+    )
     sample_points = np.array(
         [
             [0.0, 0.0, 0.0],
@@ -24,18 +42,21 @@ def walls_test(test_angle):
             [0.0, 1.0, 3.0],
         ]
     )
-    sample_points += np.array([-10, -10, 0])
+    sample_points = np.dot(sample_points, rot_mat.T)
+    sample_points += np.array([0, -10, 0])
+    
+    gen = np.random.Generator(np.random.PCG64())
+    gen.shuffle(sample_points)
+    print(sample_points)
     bx = bbox.BBox(sample_points)
-
-    print(f"Test angle: {test_angle}")
-    bx.rotate(test_angle)
-    bx.translate(np.array([1.0, 2.0, 0.0]))
     bx.order_points()
     print(f"Box angle: {bx.angle()}")
+    print(bx.corner_points)
 
     ifc_model = ifcfile.IfcModelBuilder("my_file.ifc", "my_project")
+    mats = ifcmaterial.IfcMaterials(ifc_model.model)
 
-    wall = ifcwall.IfcWall(ifc_model)
+    wall = ifcwall.IfcWall(ifc_model, ifc_material=mats.concrete)
     wall.create_wall(bx)
 
     ifc_model.write()
@@ -93,8 +114,9 @@ def door_test(ang):
             [0.0, 1.0, 3.0],
         ]
     )
-    wall_points += np.array([-10, -10, 0])
+    wall_points += np.array([-2, -2, 0])
     wall_points = np.dot(wall_points, rot_mat.T)
+
     wall_bx = bbox.BBox(wall_points)
     # wall_bx.rotate(180)
     wall_bx.order_points()
@@ -155,11 +177,16 @@ def column_test():
 
 
 def main():
-    # walls_test(90.0002257895)
-    for i in range(0, 380, 10):
-        # door_test(i)
-        walls_test(i)
+    for i in range(10):
+        walls_test(0.0)
+        walls_test(180.0)
+        # walls_test(180.0 - np.random.random() / 1e6)
+        # walls_test(0.0)
+        #     # door_test(i)
+        # walls_test(np.random.random() * 180)
     # column_test()
+    # for i in range(10):
+    #     walls_test(89.999999999999999999999)
 
 
 if __name__ == "__main__":
