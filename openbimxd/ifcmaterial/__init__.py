@@ -1,0 +1,3 @@
+"""
+Create a set of IFC materials. Only generic implementation so far, more to come...
+"""

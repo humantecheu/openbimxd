@@ -6,13 +6,32 @@ from ifcopenshell import util
 
 
 class IfcColumn:
+    """
+    A class to create an IfcColumn
+
+    Attributes:
+        ifc_model : IfcModelBuilder object
+
+    Methods:
+        create
+            Create the column geometry representation, assign the column to a building
+            storey.
+        get_verts
+            Get the vertices of the geometry representation.
+    """
+
     def __init__(self, ifc_model) -> None:
+        """Initialize IfcColumn. Creates an empty IfcColumn object into the Ifc model.
+
+        Args:
+            ifc_model (ifcfile): Ifc Model to create column into
+        """
         self.ifc_model = ifc_model
         self.column = run("root.create_entity", ifc_model.model, ifc_class="IfcColumn")
 
         pass
 
-    def create(self, bx, shape="square", **kwargs):
+    def create(self, bx, shape="square", **kwargs) -> None:
         """Creates round and square columns
 
         Kwargs:
@@ -76,7 +95,12 @@ class IfcColumn:
             product=self.column,
         )
 
-    def get_verts(self):
+    def get_verts(self) -> np.ndarray:
+        """Get the vertices i.e., all corner points of the geometry representation
+
+        Returns:
+            verts: np.ndarray
+        """
         # ifc geom settings for ifc box visualization
         settings = ifcopenshell.geom.settings()
         settings.set(settings.USE_WORLD_COORDS, True)

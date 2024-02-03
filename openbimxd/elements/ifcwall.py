@@ -5,8 +5,22 @@ import ifcopenshell.geom
 
 
 class IfcWall:
+    """
+    A class to create an IfcWall
+
+    Attributes:
+        ifc_model : IfcModelBuilder object
+
+    Methods:
+        create_wall
+            Create the wall geometry representation, assign the wall to a building
+            storey.
+        get_verts
+            Get the vertices of the geometry representation.
+    """
+
     def __init__(self, ifc_model, ifc_material=None) -> None:
-        """initialize IfcWall object. Creates an empty IfcWall in the IFC model
+        """Initialize IfcWall object. Creates an empty IfcWall in the IFC model
         given as input.
 
         Args:
@@ -17,7 +31,7 @@ class IfcWall:
         self.ifc_material = ifc_material
         self.matrix = np.eye(4)
 
-    def create_wall(self, bx, uid=None):
+    def create_wall(self, bx, uid=None) -> None:
         """Creates IfcWalls from a bounding box
 
         Args:
@@ -96,7 +110,12 @@ class IfcWall:
             product=self.wall,
         )
 
-    def get_verts(self):
+    def get_verts(self) -> np.ndarray:
+        """Get the vertices i.e., all corner points of the geometry representation
+
+        Returns:
+            verts: np.ndarray
+        """
         # ifc geom settings for ifc box visualization
         settings = ifcopenshell.geom.settings()
         settings.set(settings.USE_WORLD_COORDS, True)

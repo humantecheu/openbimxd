@@ -5,17 +5,39 @@ import ifcopenshell.geom
 
 
 class IfcDoor:
-    def __init__(self, ifc_model):
-        """initialize IfcDoor object. Creates an empty IfcDoor in the IFC model
+    """
+    A class to create an IfcDoor
+
+    Attributes:
+        ifc_model : IfcModelBuilder object
+
+    Methods:
+        create_door
+            Create a generic box-style door geometry representation. Assign the door
+            to a building storey.
+        get_verts
+            Get the vertices of the geometry representation.
+    """
+
+    def __init__(self, ifc_model) -> None:
+        """Initialize IfcDoor object. Creates an empty IfcDoor in the IFC model
         given as input.
 
         Args:
-            ifc_model (ifcfile): The IFC file the IfcWall will be added to
+            ifc_model (ifcopenshell.file): The IFC file the IfcWall will be added to
         """
         self.door = run("root.create_entity", ifc_model.model, ifc_class="IfcDoor")
         self.ifc_model = ifc_model
 
-    def create_door(self, wall, bx, uid=None):
+    def create_door(self, wall, bx, uid=None) -> None:
+        """Create door placement, representation and opening and assign door to
+        building storey
+
+        Args:
+            wall (IfcWall): object of IFC wall class, parent object
+            bx (bbox): reconstructed door geometry
+            uid (guid, optional): Use specific uid in case of update. Defaults to None.
+        """
         print("-- creating IFC door")
         # set uid if given
         if uid is not None:
@@ -80,15 +102,6 @@ class IfcDoor:
             is_si=True,
         )
 
-        # # create relation to wall
-        # run(
-        #     "geometry.connect_element",
-        #     self.ifc_model.model,
-        #     relating_element=self.door,
-        #     related_element=wall,
-        #     description=None,
-        # )
-
         # Place our wall in the ground floor
         run(
             "spatial.assign_container",
@@ -97,7 +110,12 @@ class IfcDoor:
             product=self.door,
         )
 
-    def get_verts(self):
+    def get_verts(self) -> np.ndarray:
+        """Get the vertices i.e., all corner points of the geometry representation
+
+        Returns:
+            verts: np.ndarray
+        """
         # ifc geom settings for ifc box visualization
         settings = ifcopenshell.geom.settings()
         settings.set(settings.USE_WORLD_COORDS, True)

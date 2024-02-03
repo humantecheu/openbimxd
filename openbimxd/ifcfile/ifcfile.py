@@ -3,6 +3,19 @@ from ifcopenshell.api import run
 
 
 class IfcModelBuilder:
+    """
+    A class to create an IFC model with a basic hierarchy.
+
+    Attributes:
+        filename (str): Path to write the file to
+        project_name (str): optional, name of the IfcProject
+        site_name (str): optional, name of the IfcSite
+        building_name (str): optional, name of the IfcBuilding
+        storey_name (str): optional, name of the IfcBuildingStorey
+        schema (str): optional, identifies the IFC schema. Typically IFC2X3 or IFC4
+
+    """
+
     def __init__(
         self,
         filename,
@@ -12,6 +25,19 @@ class IfcModelBuilder:
         storey_name="Level 0",
         schema="IFC4",
     ) -> None:
+        """
+        Constructs an IfcModelBuilder object
+
+        Attributes:
+            filename (str): Path to write the file to
+            project_name (str): optional, name of the IfcProject
+            site_name (str): optional, name of the IfcSite
+            building_name (str): optional, name of the IfcBuilding
+            storey_name (str): optional, name of the IfcBuildingStorey
+            schema (str): optional, identifies the IFC schema. Typically IFC2X3 or IFC4
+
+        """
+
         self.filename = filename
         self.project_name = project_name
         self.site_name = site_name
@@ -83,4 +109,5 @@ class IfcModelBuilder:
         )
 
     def write(self):
+        """Write the IFC model to file."""
         self.model.write(self.filename)
