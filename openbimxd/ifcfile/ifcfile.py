@@ -11,17 +11,16 @@
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# BlenderBIM Add-on is distributed in the hope that it will be useful,
+# openbimxd is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with BlenderBIM Add-on.  If not, see <http://www.gnu.org/licenses/>.
+# along with openbimxd.  If not, see <http://www.gnu.org/licenses/>.
 #
 # This project uses IfcOpenShell <https://blenderbim.org/>, all credits to
 # Dion Moult for his great work
-
 
 import ifcopenshell
 from ifcopenshell.api import run
