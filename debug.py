@@ -1,3 +1,27 @@
+# openbimxd - open source tools to interact with IFC files
+# Copyright (C) 2024, 2024 the HumanTech project
+# Main contributors: Fabian Kaufmann fabian.kaufmann@rptu.de
+#           Marius Schellen marius.schellen@rptu.de
+#           Mahdi Chamseddine mahdi.chamseddine@dfki.de
+#
+# This file is part of openbimxd
+#
+# openbimxd is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# BlenderBIM Add-on is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with BlenderBIM Add-on.  If not, see <http://www.gnu.org/licenses/>.
+#
+# This project uses IfcOpenShell <https://blenderbim.org/>, all credits to
+# Dion Moult for his great work
+
 import numpy as np
 import open3d as o3d
 
@@ -114,7 +138,7 @@ def door_test(ang):
             [0.0, 1.0, 3.0],
         ]
     )
-    wall_points += np.array([-2, -2, 0])
+    # wall_points += np.array([-2, -2, 0])
     wall_points = np.dot(wall_points, rot_mat.T)
 
     wall_bx = bbox.BBox(wall_points)
@@ -133,7 +157,7 @@ def door_test(ang):
             [1.0, 1.0, 2.0],
         ]
     )
-    door_points += np.array([-10, -10, 0])
+    # door_points += np.array([-10, -10, 0])
     door_points = np.dot(door_points, rot_mat.T)
     door_box = bbox.BBox(door_points)
     door_box.order_points()
@@ -177,13 +201,14 @@ def column_test():
 
 
 def main():
-    for i in range(10):
-        walls_test(0.0)
-        walls_test(180.0)
-        # walls_test(180.0 - np.random.random() / 1e6)
-        # walls_test(0.0)
-        #     # door_test(i)
-        # walls_test(np.random.random() * 180)
+    door_test(0)
+    # for i in range(10):
+    #     walls_test(0.0)
+    #     walls_test(180.0)
+    # walls_test(180.0 - np.random.random() / 1e6)
+    # walls_test(0.0)
+    #     # door_test(i)
+    # walls_test(np.random.random() * 180)
     # column_test()
     # for i in range(10):
     #     walls_test(89.999999999999999999999)
