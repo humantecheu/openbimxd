@@ -5,6 +5,7 @@ __pycache__/
 
 # Test IFC files
 *.ifc
+!AC20-FZK-Haus.ifc
 
 # Test point clouds
 *.ply
