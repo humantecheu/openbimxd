@@ -22,10 +22,10 @@
 # This project uses IfcOpenShell <https://blenderbim.org/>, all credits to
 # Dion Moult for his great work
 
-import numpy as np
-from ifcopenshell.api import run
-from ifcopenshell import util
 import ifcopenshell.geom
+import numpy as np
+from ifcopenshell import util
+from ifcopenshell.api import run
 
 
 class IfcWall:

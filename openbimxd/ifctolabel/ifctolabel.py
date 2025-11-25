@@ -26,9 +26,9 @@ import ifcopenshell
 import ifcopenshell.geom
 import numpy as np
 import open3d as o3d
-from scipy.spatial import ConvexHull
 from pystruct3d.bbox import bbox
 from pystruct3d.visualization import visualization
+from scipy.spatial import ConvexHull
 
 
 class IfcToLabel:

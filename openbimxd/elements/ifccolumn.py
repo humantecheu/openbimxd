@@ -23,11 +23,11 @@
 # Dion Moult for his great work
 
 
-import numpy as np
 import ifcopenshell
 import ifcopenshell.geom
-from ifcopenshell.api import run
+import numpy as np
 from ifcopenshell import util
+from ifcopenshell.api import run
 
 
 class IfcColumn:

@@ -24,11 +24,11 @@
 
 """
 Create IFC objects based on bouding box bbox objects from pystruct3d. Pystruct3d offers
-basic geometric reconstruction algorithms to build your own scan to BIM pipeline. Refer to 
-https://github.com/humantecheu/pystruct3d for more information. 
+basic geometric reconstruction algorithms to build your own scan to BIM pipeline. Refer to
+https://github.com/humantecheu/pystruct3d for more information.
 
-To create the IFC objects, you need an IFC file. Use ifcfile / IfcModelBuilder class to 
-create it. 
+To create the IFC objects, you need an IFC file. Use ifcfile / IfcModelBuilder class to
+create it.
 
 MODULES / ClASSES
     ifcolumn / IfcColumn

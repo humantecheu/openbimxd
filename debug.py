@@ -23,18 +23,16 @@
 # Dion Moult for his great work
 
 
-import numpy as np
-import open3d as o3d
-
 import ifcopenshell
 import ifcopenshell.geom
-
-from openbimxd.ifcfile import ifcfile
-from openbimxd.elements import ifcwall, ifcdoor, ifccolumn
-from openbimxd.ifcmaterial import ifcmaterial
-
+import numpy as np
+import open3d as o3d
 from pystruct3d.bbox import bbox
 from pystruct3d.visualization import visualization
+
+from openbimxd.elements import ifccolumn, ifcdoor, ifcwall
+from openbimxd.ifcfile import ifcfile
+from openbimxd.ifcmaterial import ifcmaterial
 
 
 def walls_test(test_angle):
@@ -69,7 +67,7 @@ def walls_test(test_angle):
     )
     sample_points = np.dot(sample_points, rot_mat.T)
     sample_points += np.array([0, -10, 0])
-    
+
     gen = np.random.Generator(np.random.PCG64())
     gen.shuffle(sample_points)
     print(sample_points)

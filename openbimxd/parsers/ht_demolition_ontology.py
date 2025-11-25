@@ -1,11 +1,10 @@
 import json
-import numpy as np
 
 import ifcopenshell
 import ifcopenshell.geom
-import ifcopenshell.util.placement
 import ifcopenshell.util as util
-
+import ifcopenshell.util.placement
+import numpy as np
 from pystruct3d.bbox import bbox
 
 

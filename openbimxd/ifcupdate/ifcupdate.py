@@ -22,11 +22,10 @@
 # This project uses IfcOpenShell <https://blenderbim.org/>, all credits to
 # Dion Moult for his great work
 
-import numpy as np
-
 import ifcopenshell
-from ifcopenshell.util import placement, element
+import numpy as np
 from ifcopenshell.api import run
+from ifcopenshell.util import element, placement
 
 from openbimxd.ifcmaterial import ifcmaterial
 

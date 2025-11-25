@@ -23,13 +23,13 @@
 # Dion Moult for his great work
 
 
-import ifcopenshell
-from ifcopenshell import file
-import ifcopenshell.util as util
-from ifcopenshell.api import run
-from ifcopenshell.api import material
-import ifcopenshell.util.selector
 import time
+
+import ifcopenshell
+import ifcopenshell.util as util
+import ifcopenshell.util.selector
+from ifcopenshell import file
+from ifcopenshell.api import material, run
 
 
 class objectFilter:
