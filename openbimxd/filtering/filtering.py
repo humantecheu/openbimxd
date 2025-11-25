@@ -25,11 +25,14 @@
 
 import time
 
-import ifcopenshell
-import ifcopenshell.util as util
+import ifcopenshell.api.aggregate
+import ifcopenshell.api.feature
+import ifcopenshell.api.material
+import ifcopenshell.api.pset
+import ifcopenshell.api.spatial
+import ifcopenshell.util.element
 import ifcopenshell.util.selector
 from ifcopenshell import file
-from ifcopenshell.api import material, run
 
 
 class objectFilter:
@@ -80,28 +83,24 @@ class objectFilter:
 
         for site in self.ifc_model.by_type("IfcSite"):
             new_site = self.filtered_model.add(site)
-            run(
-                "aggregate.assign_object",
+            ifcopenshell.api.aggregate.assign_object(
                 self.filtered_model,
+                products=[new_site],
                 relating_object=prj,
-                product=new_site,
             )
             for building in self.ifc_model.by_type("IfcBuilding"):
                 new_building = self.filtered_model.add(building)
-                run(
-                    "aggregate.assign_object",
+                ifcopenshell.api.aggregate.assign_object(
                     self.filtered_model,
+                    products=[new_building],
                     relating_object=new_site,
-                    product=new_building,
                 )
-
                 for st in self.ifc_model.by_type("IfcBuildingStorey"):
                     new_st = self.filtered_model.add(st)
-                    run(
-                        "aggregate.assign_object",
+                    ifcopenshell.api.aggregate.assign_object(
                         self.filtered_model,
+                        products=[new_st],
                         relating_object=new_building,
-                        product=new_st,
                     )
 
     def filter_objects(self, search_str: str):
@@ -114,7 +113,10 @@ class objectFilter:
         Args:
             search_str (str): string with search parameters: IFC Class, name, ...
         """
-        self.objects = util.selector.filter_elements(self.ifc_model, search_str)
+        self.objects = ifcopenshell.util.selector.filter_elements(
+            self.ifc_model,
+            search_str,
+        )
         print(f"{len(self.objects)} objects filtered")
 
         # TODO: useful for getting child elements
@@ -135,25 +137,29 @@ class objectFilter:
             new_mat_sets[new_set.LayerSetName] = new_set
         return new_mats, new_mat_sets
 
-    def assign_container(self, obj, new_obj):
+    def assign_container(self, obj, new_obj) -> None:
         """Assign spatial container from the old object to the filtered object
 
         Args:
             obj (IfcElement): element in the original file
             new_obj (IfcElement): filtered element in the filtered file
         """
-        container_info = util.element.get_container(obj).get_info()
+        container = ifcopenshell.util.element.get_container(obj)
+        if container is None:
+            return
+
+        container_info = container.get_info()
+
         new_container = list(
-            util.selector.filter_elements(
+            ifcopenshell.util.selector.filter_elements(
                 self.filtered_model,
                 f"{container_info.get('type')}, Name={container_info.get('Name')}",
             )
         )
-        run(
-            "spatial.assign_container",
+        ifcopenshell.api.spatial.assign_container(
             self.filtered_model,
+            products=[new_obj],
             relating_structure=new_container[0],
-            product=new_obj,
         )
 
     def assign_opening(self, obj, new_obj):
@@ -163,18 +169,17 @@ class objectFilter:
             obj (IfcElement): element in the original file
             new_obj (IfcElement): filtered element in the filtered file
         """
-        child_objects = util.element.get_decomposition(obj)
+        child_objects = ifcopenshell.util.element.get_decomposition(obj)
         for child in child_objects:
             if child.is_a("IfcOpeningElement"):
                 new_opening = self.filtered_model.add(child)
-                run(
-                    "void.add_opening",
+                ifcopenshell.api.feature.add_feature(
                     self.filtered_model,
-                    opening=new_opening,
+                    feature=new_opening,
                     element=new_obj,
                 )
 
-    def assign_material(self, obj, new_obj, new_mats, new_mat_sets):
+    def assign_material(self, obj, new_obj, new_mats, new_mat_sets) -> None:
         """Assign materials to the filtered elements. Materials or material layer sets
         are retrieved from the original objects.
 
@@ -185,43 +190,38 @@ class objectFilter:
             new_mat_sets (dict): dictionary with new material layer sets
         """
         # BUG: get material layer sets
-        material = util.element.get_material(obj)
-        try:
-            if material.is_a("IfcMaterial"):
-                # print(f"Assign new material {new_mats.get(material.Name)}")
-                run(
-                    "material.assign_material",
-                    self.filtered_model,
-                    product=new_obj,
-                    material=new_mats.get(material.Name),
-                )
+        material = ifcopenshell.util.element.get_material(obj)
+        if material is None:
+            return
 
-            elif material.is_a("IfcMaterialLayerSetUsage"):
-                # print(
-                #     f"IfcMaterialLayerSetUsage, assign new material layer set {new_mat_sets.get(material[0].LayerSetName)}"
-                # )
-                run(
-                    "material.assign_material",
-                    self.filtered_model,
-                    product=new_obj,
-                    material=new_mat_sets.get(material[0].LayerSetName),
-                )
-            elif material.is_a("IfcMaterialLayerSet"):
-                # print(
-                #     f"IfcMaterialLayerSet, assign new material layer set {new_mat_sets.get(material.LayerSetName)}"
-                # )
-                run(
-                    "material.assign_material",
-                    self.filtered_model,
-                    product=new_obj,
-                    material=new_mat_sets.get(material.LayerSetName),
-                )
-        except TypeError:
-            print("Material is NoneType, passing")
-        except AttributeError:
-            print("Material is NoneType, passing")
+        if material.is_a("IfcMaterial"):
+            # print(f"Assign new material {new_mats.get(material.Name)}")
+            ifcopenshell.api.material.assign_material(
+                self.filtered_model,
+                products=[new_obj],
+                material=new_mats.get(material.Name),
+            )
 
-    def assign_psets(self, obj, new_obj):
+        elif material.is_a("IfcMaterialLayerSetUsage"):
+            # print(
+            #     f"IfcMaterialLayerSetUsage, assign new material layer set {new_mat_sets.get(material[0].LayerSetName)}"
+            # )
+            ifcopenshell.api.material.assign_material(
+                self.filtered_model,
+                products=[new_obj],
+                material=new_mat_sets.get(material[0].LayerSetName),
+            )
+        elif material.is_a("IfcMaterialLayerSet"):
+            # print(
+            #     f"IfcMaterialLayerSet, assign new material layer set {new_mat_sets.get(material.LayerSetName)}"
+            # )
+            ifcopenshell.api.material.assign_material(
+                self.filtered_model,
+                products=[new_obj],
+                material=new_mat_sets.get(material.LayerSetName),
+            )
+
+    def assign_psets(self, obj, new_obj) -> None:
         """Add and assign psets
 
         Args:
@@ -229,16 +229,17 @@ class objectFilter:
             new_obj (IfcElement): filtered element in the filtered file
         """
         # get property set from old
-        psets = util.element.get_psets(obj)
+        psets = ifcopenshell.util.element.get_psets(obj)
         for k in list(psets.keys()):
             # assign property set
-            pset = run(
-                "pset.add_pset",
+            pset = ifcopenshell.api.pset.add_pset(
                 self.filtered_model,
                 product=new_obj,
                 name=k,
             )
             p_dict = psets.get(k)
+            if p_dict is None:
+                continue
             # fix ThermalTransmittance in IFC2X3 breaking
             if (
                 self.filtered_model.schema == "IFC2X3"
@@ -249,22 +250,20 @@ class objectFilter:
                 )
                 # workaround: set to None to avoid errors
                 p_dict["ThermalTransmittance"] = None
-                run(
-                    "pset.edit_pset",
+                ifcopenshell.api.pset.edit_pset(
                     self.filtered_model,
                     pset=pset,
                     properties=p_dict,
                 )
 
             else:
-                run(
-                    "pset.edit_pset",
+                ifcopenshell.api.pset.edit_pset(
                     self.filtered_model,
                     pset=pset,
                     properties=p_dict,
                 )
 
-    def export_model(self):
+    def export_model(self) -> None:
         """Execute filtering and save filtered model to IFC file"""
         new_mats, new_mat_sets = self.create_materials()
         for i, obj in enumerate(self.objects):
@@ -274,7 +273,7 @@ class objectFilter:
             self.assign_material(obj, new_obj, new_mats, new_mat_sets)
             self.assign_psets(obj, new_obj)
             self.assign_opening(obj, new_obj)
-            if util.element.get_container(obj) is not None:
+            if ifcopenshell.util.element.get_container(obj) is not None:
                 self.assign_container(obj, new_obj)
 
             if i % 100 == 0:

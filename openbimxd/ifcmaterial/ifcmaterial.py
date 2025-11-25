@@ -23,7 +23,7 @@
 # Dion Moult for his great work
 
 
-import ifcopenshell
+import ifcopenshell.api.material
 
 
 class IfcMaterials:
@@ -35,9 +35,13 @@ class IfcMaterials:
     """
 
     def __init__(self, ifc_model) -> None:
-        self.concrete = ifcopenshell.api.run(
-            "material.add_material", ifc_model, name="CON01", category="concrete"
+        self.concrete = ifcopenshell.api.material.add_material(
+            ifc_model,
+            name="CON01",
+            category="concrete",
         )
-        self.clt = ifcopenshell.api.run(
-            "material.add_material", ifc_model, name="CLT", category="wood"
+        self.clt = ifcopenshell.api.material.add_material(
+            ifc_model,
+            name="CLT",
+            category="wood",
         )

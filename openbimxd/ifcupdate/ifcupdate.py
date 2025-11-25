@@ -24,6 +24,7 @@
 
 import ifcopenshell
 import numpy as np
+from ifcopenshell import entity_instance
 from ifcopenshell.api import run
 from ifcopenshell.util import element, placement
 
@@ -42,7 +43,7 @@ class UpdateIfcObject:
     def __init__(
         self,
         model: ifcopenshell.file,
-        ifc_object: ifcopenshell.main.ifcopenshell_wrapper.Element,
+        ifc_object: entity_instance,
     ) -> None:
         """Initialize UpdateIfcObject object
 

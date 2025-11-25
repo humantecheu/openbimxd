@@ -23,7 +23,12 @@
 # Dion Moult for his great work
 
 import ifcopenshell
-from ifcopenshell.api import run
+import ifcopenshell.api.aggregate
+import ifcopenshell.api.context
+import ifcopenshell.api.project
+import ifcopenshell.api.root
+import ifcopenshell.api.unit
+from ifcopenshell.util.schema import IFC_SCHEMA
 
 
 class IfcModelBuilder:
@@ -36,18 +41,18 @@ class IfcModelBuilder:
         site_name (str): optional, name of the IfcSite
         building_name (str): optional, name of the IfcBuilding
         storey_name (str): optional, name of the IfcBuildingStorey
-        schema (str): optional, identifies the IFC schema. Typically IFC2X3 or IFC4
+        schema (IFC_SCHEMA): optional, identifies the IFC schema. Typically IFC2X3 or IFC4
 
     """
 
     def __init__(
         self,
-        filename,
-        project_name="awesome project",
-        site_name="nice site",
-        building_name="building A",
-        storey_name="Level 0",
-        schema="IFC4",
+        filename: str,
+        project_name: str = "awesome project",
+        site_name: str = "nice site",
+        building_name: str = "building A",
+        storey_name: str = "Level 0",
+        schema: IFC_SCHEMA = "IFC4",
     ) -> None:
         """
         Constructs an IfcModelBuilder object
@@ -69,43 +74,44 @@ class IfcModelBuilder:
         self.storey_name = storey_name
         self.schema = schema
 
-        self.model = ifcopenshell.file(schema=self.schema)
-
-        self.project = run(
-            "root.create_entity",
+        # self.model = ifcopenshell.file(schema=self.schema)
+        self.model = ifcopenshell.api.project.create_file(version=self.schema)
+        self.project = ifcopenshell.api.root.create_entity(
             self.model,
             ifc_class="IfcProject",
-            name="self.project_name",
+            name=self.project_name,
         )
 
         # Specify units: millimeters, square meters, and cubic meters
-        run("unit.assign_unit", self.model)
+        ifcopenshell.api.unit.assign_unit(self.model)
 
         # Let's create a modeling geometry context, so we can store 3D geometry
-        self.context = run("context.add_context", self.model, context_type="Model")
+        self.context = ifcopenshell.api.context.add_context(
+            self.model,
+            context_type="Model",
+        )
 
         # In particular, in this example we want to store the 3D "body" geometry of objects, i.e. the body shape
-        self.body = run(
-            "context.add_context",
+        self.body = ifcopenshell.api.context.add_context(
             self.model,
-            context_type="self.model",
+            context_type="Model",
             context_identifier="Body",
             target_view="MODEL_VIEW",
             parent=self.context,
         )
 
         # Create a site, building, and storey. Many hierarchies are possible.
-        self.site = run(
-            "root.create_entity", self.model, ifc_class="IfcSite", name=self.site_name
+        self.site = ifcopenshell.api.root.create_entity(
+            self.model,
+            ifc_class="IfcSite",
+            name=self.site_name,
         )
-        self.building = run(
-            "root.create_entity",
+        self.building = ifcopenshell.api.root.create_entity(
             self.model,
             ifc_class="IfcBuilding",
             name=self.building_name,
         )
-        self.storey = run(
-            "root.create_entity",
+        self.storey = ifcopenshell.api.root.create_entity(
             self.model,
             ifc_class="IfcBuildingStorey",
             name=self.storey_name,
@@ -113,25 +119,22 @@ class IfcModelBuilder:
 
         # Since the site is our top level location, assign it to the project
         # Then place our building on the site, and our storey in the building
-        run(
-            "aggregate.assign_object",
+        ifcopenshell.api.aggregate.assign_object(
             self.model,
             relating_object=self.project,
-            product=self.site,
+            products=[self.site],
         )
-        run(
-            "aggregate.assign_object",
+        ifcopenshell.api.aggregate.assign_object(
             self.model,
             relating_object=self.site,
-            product=self.building,
+            products=[self.building],
         )
-        run(
-            "aggregate.assign_object",
+        ifcopenshell.api.aggregate.assign_object(
             self.model,
             relating_object=self.building,
-            product=self.storey,
+            products=[self.storey],
         )
 
-    def write(self):
+    def write(self) -> None:
         """Write the IFC model to file."""
         self.model.write(self.filename)

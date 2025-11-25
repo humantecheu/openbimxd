@@ -23,10 +23,12 @@
 # Dion Moult for his great work
 
 
+import ifcopenshell.api.feature
+import ifcopenshell.api.geometry
+import ifcopenshell.api.root
+import ifcopenshell.api.spatial
 import ifcopenshell.geom
 import numpy as np
-from ifcopenshell import util
-from ifcopenshell.api import run
 
 
 class IfcDoor:
@@ -51,7 +53,10 @@ class IfcDoor:
         Args:
             ifc_model (ifcopenshell.file): The IFC file the IfcWall will be added to
         """
-        self.door = run("root.create_entity", ifc_model.model, ifc_class="IfcDoor")
+        self.door = ifcopenshell.api.root.create_entity(
+            ifc_model.model,
+            ifc_class="IfcDoor",
+        )
         self.ifc_model = ifc_model
 
     def create_door(self, wall, bx, uid=None) -> None:
@@ -73,8 +78,7 @@ class IfcDoor:
         door_matrix[:, 3][0:3] += bx.corner_points[0] - wall.matrix[:, 3][0:3]
         # Set our door's Object Placement using our matrix.
         # `is_si=True` states that we are using SI units instead of project units.
-        run(
-            "geometry.edit_object_placement",
+        ifcopenshell.api.geometry.edit_object_placement(
             self.ifc_model.model,
             product=self.door,
             matrix=door_matrix,
@@ -83,8 +87,7 @@ class IfcDoor:
 
         # Add a new wall-like body geometry with bounding box dimensions
         # representation is used for opening and door
-        opening_representation = run(
-            "geometry.add_wall_representation",
+        opening_representation = ifcopenshell.api.geometry.add_wall_representation(
             self.ifc_model.model,
             context=self.ifc_model.body,
             length=float(bx.length()),
@@ -98,29 +101,30 @@ class IfcDoor:
         #     context=self.ifc_model.body,
         #     door_type="DOUBLE_SWING_RIGHT",
         # )
-        opening = run(
-            "root.create_entity", self.ifc_model.model, ifc_class="IfcOpeningElement"
+        opening = ifcopenshell.api.root.create_entity(
+            self.ifc_model.model,
+            ifc_class="IfcOpeningElement",
         )
 
         # Assign the opening to the model
-        run(
-            "geometry.assign_representation",
+        ifcopenshell.api.geometry.assign_representation(
             self.ifc_model.model,
             product=opening,
             representation=opening_representation,
         )
+
         # using box-style opening representation
-        run(
-            "geometry.assign_representation",
+        ifcopenshell.api.geometry.assign_representation(
             self.ifc_model.model,
             product=self.door,
             representation=opening_representation,
         )
-        run(
-            "void.add_opening", self.ifc_model.model, opening=opening, element=wall.wall
+        ifcopenshell.api.feature.add_feature(
+            self.ifc_model.model,
+            feature=opening,
+            element=wall.wall,
         )
-        run(
-            "geometry.edit_object_placement",
+        ifcopenshell.api.geometry.edit_object_placement(
             self.ifc_model.model,
             product=opening,
             matrix=door_matrix,
@@ -128,11 +132,10 @@ class IfcDoor:
         )
 
         # Place our wall in the ground floor
-        run(
-            "spatial.assign_container",
+        ifcopenshell.api.spatial.assign_container(
             self.ifc_model.model,
+            products=[self.door],
             relating_structure=self.ifc_model.storey,
-            product=self.door,
         )
 
     def get_verts(self) -> np.ndarray:
@@ -143,7 +146,7 @@ class IfcDoor:
         """
         # ifc geom settings for ifc box visualization
         settings = ifcopenshell.geom.settings()
-        settings.set(settings.USE_WORLD_COORDS, True)
+        settings.set("use-world-coords", True)
         # retrieve shape
         shape = ifcopenshell.geom.create_shape(settings, self.door)
         verts = np.asarray(shape.geometry.verts)

@@ -2,7 +2,7 @@ import json
 
 import ifcopenshell
 import ifcopenshell.geom
-import ifcopenshell.util as util
+import ifcopenshell.util.element
 import ifcopenshell.util.placement
 import numpy as np
 from pystruct3d.bbox import bbox
@@ -24,7 +24,7 @@ class IfcConvertOpening:
         wall_placement = ifcopenshell.util.placement.get_local_placement(
             self.ifc_wall.ObjectPlacement
         )[:, 3][:3]
-        child_objects = util.element.get_decomposition(self.ifc_wall)
+        child_objects = ifcopenshell.util.element.get_decomposition(self.ifc_wall)
 
         # get the geometry of the opening
         settings = ifcopenshell.geom.settings()

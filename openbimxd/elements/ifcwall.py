@@ -22,10 +22,14 @@
 # This project uses IfcOpenShell <https://blenderbim.org/>, all credits to
 # Dion Moult for his great work
 
+import ifcopenshell.api.geometry
+import ifcopenshell.api.material
+import ifcopenshell.api.pset
+import ifcopenshell.api.root
+import ifcopenshell.api.spatial
 import ifcopenshell.geom
+import ifcopenshell.util.placement
 import numpy as np
-from ifcopenshell import util
-from ifcopenshell.api import run
 
 
 class IfcWall:
@@ -50,7 +54,11 @@ class IfcWall:
         Args:
             ifc_model (ifcfile): The IFC file the IfcWall will be added to
         """
-        self.wall = run("root.create_entity", ifc_model.model, ifc_class="IfcWall")
+
+        self.wall = ifcopenshell.api.root.create_entity(
+            ifc_model.model,
+            ifc_class="IfcWall",
+        )
         self.ifc_model = ifc_model
         self.ifc_material = ifc_material
         self.matrix = np.eye(4)
@@ -71,14 +79,13 @@ class IfcWall:
         # This is because the rotation origin is always at 0, 0, 0.
         # Rotate anti-clockwise around the Z axis (i.e. in plan).
         # Anti-clockwise is positive. Clockwise is negative.
-        matrix = util.placement.rotation(bx.angle(), "Z") @ matrix
+        matrix = ifcopenshell.util.placement.rotation(bx.angle(), "Z") @ matrix
         # points ordered, set placement to 1st corner point
         matrix[:, 3][0:3] = bx.corner_points[0]
 
         # Set our wall's Object Placement using our matrix.
         # `is_si=True` states that we are using SI units instead of project units.
-        run(
-            "geometry.edit_object_placement",
+        ifcopenshell.api.geometry.edit_object_placement(
             self.ifc_model.model,
             product=self.wall,
             matrix=matrix,
@@ -87,17 +94,16 @@ class IfcWall:
         self.matrix = matrix
 
         # Add a new wall-like body geometry with bounding box dimensions
-        representation = run(
-            "geometry.add_wall_representation",
+        representation = ifcopenshell.api.geometry.add_wall_representation(
             self.ifc_model.model,
             context=self.ifc_model.body,
             length=float(bx.length()),
             height=float(bx.height()),
             thickness=float(bx.width()),
         )
+
         # Assign our new body geometry back to our wall
-        run(
-            "geometry.assign_representation",
+        ifcopenshell.api.geometry.assign_representation(
             self.ifc_model.model,
             product=self.wall,
             representation=representation,
@@ -105,33 +111,29 @@ class IfcWall:
 
         # assign material
         if self.ifc_material is not None:
-            run(
-                "material.assign_material",
+            ifcopenshell.api.material.assign_material(
                 self.ifc_model.model,
-                product=self.wall,
+                products=[self.wall],
                 type="IfcMaterial",
                 material=self.ifc_material,
             )
         # assign property set
-        pset = run(
-            "pset.add_pset",
+        pset = ifcopenshell.api.pset.add_pset(
             self.ifc_model.model,
             product=self.wall,
             name="Pset_WallCommon",
         )
-        run(
-            "pset.edit_pset",
+        ifcopenshell.api.pset.edit_pset(
             self.ifc_model.model,
             pset=pset,
             properties={"FireRating": "F60", "LoadBearing": True},
         )
 
         # Place our wall in the ground floor
-        run(
-            "spatial.assign_container",
+        ifcopenshell.api.spatial.assign_container(
             self.ifc_model.model,
             relating_structure=self.ifc_model.storey,
-            product=self.wall,
+            products=[self.wall],
         )
 
     def get_verts(self) -> np.ndarray:
@@ -142,7 +144,7 @@ class IfcWall:
         """
         # ifc geom settings for ifc box visualization
         settings = ifcopenshell.geom.settings()
-        settings.set(settings.USE_WORLD_COORDS, True)
+        settings.set("use-world-coords", True)
         # retrieve shape
         shape = ifcopenshell.geom.create_shape(settings, self.wall)
         verts = np.asarray(shape.geometry.verts)

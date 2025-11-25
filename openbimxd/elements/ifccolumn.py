@@ -23,11 +23,12 @@
 # Dion Moult for his great work
 
 
-import ifcopenshell
+import ifcopenshell.api.geometry
+import ifcopenshell.api.root
+import ifcopenshell.api.spatial
 import ifcopenshell.geom
+import ifcopenshell.util.placement
 import numpy as np
-from ifcopenshell import util
-from ifcopenshell.api import run
 
 
 class IfcColumn:
@@ -52,7 +53,10 @@ class IfcColumn:
             ifc_model (ifcfile): Ifc Model to create column into
         """
         self.ifc_model = ifc_model
-        self.column = run("root.create_entity", ifc_model.model, ifc_class="IfcColumn")
+        self.column = ifcopenshell.api.root.create_entity(
+            ifc_model.model,
+            ifc_class="IfcColumn",
+        )
 
         pass
 
@@ -67,12 +71,11 @@ class IfcColumn:
             shape (str, optional): "round" or "square". Defaults to "square".
         """
         matrix = np.eye(4)
-        matrix = util.placement.rotation(bx.angle(), "Z") @ matrix
+        matrix = ifcopenshell.util.placement.rotation(bx.angle(), "Z") @ matrix
         # apply transformation
         matrix[:, 3][0:3] = np.mean(bx.corner_points[:4], axis=0)
         print("Column centroid:", np.mean(bx.corner_points[:4], axis=0))
-        run(
-            "geometry.edit_object_placement",
+        ifcopenshell.api.geometry.edit_object_placement(
             self.ifc_model.model,
             product=self.column,
             matrix=matrix,
@@ -95,29 +98,27 @@ class IfcColumn:
             )
         else:
             print("Unknown column shape, passing ...")
+            return
 
         # Add a new wall-like body geometry with bounding box dimensions
-        representation = run(
-            "geometry.add_profile_representation",
+        representation = ifcopenshell.api.geometry.add_profile_representation(
             self.ifc_model.model,
             context=self.ifc_model.body,
             profile=profile,
             depth=bx.height(),
         )
         # Assign our new body geometry back to our wall
-        run(
-            "geometry.assign_representation",
+        ifcopenshell.api.geometry.assign_representation(
             self.ifc_model.model,
             product=self.column,
             representation=representation,
         )
 
         # Place our wall in the ground floor
-        run(
-            "spatial.assign_container",
+        ifcopenshell.api.spatial.assign_container(
             self.ifc_model.model,
+            products=[self.column],
             relating_structure=self.ifc_model.storey,
-            product=self.column,
         )
 
     def get_verts(self) -> np.ndarray:
@@ -128,7 +129,7 @@ class IfcColumn:
         """
         # ifc geom settings for ifc box visualization
         settings = ifcopenshell.geom.settings()
-        settings.set(settings.USE_WORLD_COORDS, True)
+        settings.set("use-world-coords", True)
         # retrieve shape
         shape = ifcopenshell.geom.create_shape(settings, self.column)
         verts = np.asarray(shape.geometry.verts)
