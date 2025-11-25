@@ -29,3 +29,11 @@ pystruct3d = { workspace = true }
 
 [tool.pyright]
 extraPaths = ["../pystruct3d/"]
+
+[tool.ruff]
+exclude      = [".eggs", ".git", ".venv"]
+line-length  = 88                         # same as black
+indent-width = 4
+
+[tool.ruff.format]
+quote-style = "double"
