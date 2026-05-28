@@ -27,7 +27,7 @@ import ifcopenshell.geom
 import numpy as np
 import open3d as o3d
 from pystruct3d.bbox import bbox
-from pystruct3d.visualization import visualization
+from pystruct3d.visualization import Visualizer
 from scipy.spatial import ConvexHull
 
 
@@ -57,7 +57,7 @@ class IfcToLabel:
         self.pcd = o3d.io.read_point_cloud(pcd_file)
         num_points = np.shape(np.asarray(self.pcd.points))[0]
         self.labels = np.zeros((num_points, 2))
-        self.visu = visualization.Visualization()
+        self.visu = Visualizer()
 
     def get_inliers(self, ifc_element) -> tuple[np.ndarray, np.ndarray]:
         """Creates a bounding box from the IFC geometry, return all inliers
@@ -84,9 +84,9 @@ class IfcToLabel:
         # visualize vertices
         orig_shape = verts.shape[0]
         verts_reshape = verts.reshape((int(orig_shape / 3), 3))
-        self.visu.points_geometry(verts_reshape)
+        self.visu.add_points(verts_reshape)
         # create visualizer object of ifc bounding box
-        self.visu.bbox_geometry(ifc_bx)
+        self.visu.add_bbox(ifc_bx)
 
         return element_pts, indices
 
@@ -155,7 +155,7 @@ class IfcToLabel:
             self.labels[indices[id_mask], 1] = obj.id()
             print("labels unique:", np.unique(self.labels))
 
-            self.visu.point_cloud_geometry(obj_pts)
+            self.visu.add_points(obj_pts)
 
     def parse_doors(self) -> None:
         """Parse doors, edit the label array."""
@@ -183,7 +183,7 @@ class IfcToLabel:
 
     def visualize(self) -> None:
         """Opens the visualization window."""
-        self.visu.visualize()
+        self.visu.show()
 
 
 def main():
@@ -206,13 +206,11 @@ def main():
     get_labels.parse_walls()
     # get_labels.visualize()
     print(np.unique(get_labels.labels))
-    point_cloud_array = np.hstack(
-        (
-            np.asarray(get_labels.pcd.points),
-            np.asarray(get_labels.pcd.colors),
-            get_labels.labels,
-        )
-    )
+    point_cloud_array = np.hstack((
+        np.asarray(get_labels.pcd.points),
+        np.asarray(get_labels.pcd.colors),
+        get_labels.labels,
+    ))
     print(point_cloud_array.shape)
     get_labels.visualize()
     np.savetxt(f"{pcd_fname[:-4]}_labeled.asc", point_cloud_array)

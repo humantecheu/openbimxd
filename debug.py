@@ -28,7 +28,7 @@ import ifcopenshell.geom
 import numpy as np
 import open3d as o3d
 from pystruct3d.bbox import bbox
-from pystruct3d.visualization import visualization
+from pystruct3d.visualization import Visualizer
 
 from openbimxd.elements import ifccolumn, ifcdoor, ifcwall
 from openbimxd.ifcfile import ifcfile
@@ -97,11 +97,11 @@ def walls_test(test_angle):
     # print(bx.corner_points)
     # print(ifc_bx.corner_points)
 
-    visu = visualization.Visualization()
-    visu.bbox_geometry(bx)
-    visu.bbox_geometry(ifc_bx, color=[1, 0.75, 0])
-    visu.points_geometry(bx.corner_points[0].reshape(1, 3))
-    visu.visualize()
+    visu = Visualizer()
+    visu.add_bbox(bx)
+    visu.add_bbox(ifc_bx, color=[1, 0.75, 0])
+    visu.add_points(bx.corner_points[0].reshape(1, 3))
+    visu.show()
 
     print("------------------------")
 
@@ -125,18 +125,16 @@ def door_test(ang):
     )
     # fmt:on
 
-    wall_points = np.array(
-        [
-            [0.0, 0.0, 0.0],
-            [5.0, 0.0, 0.0],
-            [5.0, 1.0, 0.0],
-            [0.0, 1.0, 0.0],
-            [0.0, 0.0, 3.0],
-            [5.0, 0.0, 3.0],
-            [5.0, 1.0, 3.0],
-            [0.0, 1.0, 3.0],
-        ]
-    )
+    wall_points = np.array([
+        [0.0, 0.0, 0.0],
+        [5.0, 0.0, 0.0],
+        [5.0, 1.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 0.0, 3.0],
+        [5.0, 0.0, 3.0],
+        [5.0, 1.0, 3.0],
+        [0.0, 1.0, 3.0],
+    ])
     # wall_points += np.array([-2, -2, 0])
     wall_points = np.dot(wall_points, rot_mat.T)
 
@@ -144,18 +142,16 @@ def door_test(ang):
     # wall_bx.rotate(180)
     wall_bx.order_points()
 
-    door_points = np.array(
-        [
-            [1.0, 0.0, 1.0],
-            [2.0, 0.0, 1.0],
-            [2.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0],
-            [1.0, 0.0, 2.0],
-            [2.0, 0.0, 2.0],
-            [2.0, 1.0, 2.0],
-            [1.0, 1.0, 2.0],
-        ]
-    )
+    door_points = np.array([
+        [1.0, 0.0, 1.0],
+        [2.0, 0.0, 1.0],
+        [2.0, 1.0, 1.0],
+        [1.0, 1.0, 1.0],
+        [1.0, 0.0, 2.0],
+        [2.0, 0.0, 2.0],
+        [2.0, 1.0, 2.0],
+        [1.0, 1.0, 2.0],
+    ])
     # door_points += np.array([-10, -10, 0])
     door_points = np.dot(door_points, rot_mat.T)
     door_box = bbox.BBox(door_points)
@@ -164,10 +160,10 @@ def door_test(ang):
     # door_box.project_into_parent(wall_bx)
     door_box.order_points()
 
-    visu = visualization.Visualization()
-    visu.bbox_geometry(wall_bx)
-    visu.bbox_geometry(door_box, color=[1, 0.75, 0])
-    visu.visualize()
+    visu = Visualizer()
+    visu.add_bbox(wall_bx)
+    visu.add_bbox(door_box, color=[1, 0.75, 0])
+    visu.show()
 
     ifc_model = ifcfile.IfcModelBuilder("my_file.ifc", "my_project")
 
@@ -181,18 +177,16 @@ def door_test(ang):
 
 def column_test():
     ifc_model = ifcfile.IfcModelBuilder("my_file.ifc", "my_project")
-    col_points = np.array(
-        [
-            [0.0, 0.0, 0.0],
-            [0.5, 0.0, 0.0],
-            [0.5, 0.5, 0.0],
-            [0.0, 0.5, 0.0],
-            [0.0, 0.0, 3.0],
-            [0.5, 0.0, 3.0],
-            [0.5, 0.5, 3.0],
-            [0.0, 0.5, 3.0],
-        ]
-    )
+    col_points = np.array([
+        [0.0, 0.0, 0.0],
+        [0.5, 0.0, 0.0],
+        [0.5, 0.5, 0.0],
+        [0.0, 0.5, 0.0],
+        [0.0, 0.0, 3.0],
+        [0.5, 0.0, 3.0],
+        [0.5, 0.5, 3.0],
+        [0.0, 0.5, 3.0],
+    ])
     col_box = bbox.BBox(col_points)
     ifc_col = ifccolumn.IfcColumn(ifc_model)
     ifc_col.create(col_box, shape="round")

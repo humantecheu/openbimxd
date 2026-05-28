@@ -40,20 +40,18 @@ class IfcConvertOpening:
 
                 orig_distances = child_placement - wall_placement
 
-                self.data_dict.update(
-                    {
-                        "Opening": {
-                            "ID": child.GlobalId,
-                            "X distance": orig_distances[0],
-                            "Y distance": orig_distances[1],
-                            "Z distance": orig_distances[2],
-                            "Yaw orientation": 0,
-                            "Length": bx.length(),
-                            "Width": bx.width(),
-                            "Height": bx.height(),
-                        }
+                self.data_dict.update({
+                    "Opening": {
+                        "ID": child.GlobalId,
+                        "X distance": orig_distances[0],
+                        "Y distance": orig_distances[1],
+                        "Z distance": orig_distances[2],
+                        "Yaw orientation": 0,
+                        "Length": bx.length(),
+                        "Width": bx.width(),
+                        "Height": bx.height(),
                     }
-                )
+                })
         print(self.data_dict)
         return self
 

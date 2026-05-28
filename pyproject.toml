@@ -17,18 +17,12 @@ authors = [
 ]
 
 dependencies = [
-    "ifcopenshell>=0.8.4",
-    "numpy>=2.3.5",
-    "open3d>=0.19.0",
+    "ifcopenshell",
+    "numpy",
+    "open3d",
     "pystruct3d @ https://github.com/humantecheu/pystruct3d.git",
-    "scipy>=1.16.3",
+    "scipy",
 ]
-
-[tool.uv.sources]
-pystruct3d = { workspace = true }
-
-[tool.pyright]
-extraPaths = ["../pystruct3d/"]
 
 [tool.ruff]
 exclude      = [".eggs", ".git", ".venv"]
@@ -37,3 +31,12 @@ indent-width = 4
 
 [tool.ruff.format]
 quote-style = "double"
+preview     = true
+[tool.ty.environment]
+extra-paths = ["../pystruct3d/"]
+
+# [tool.pyright]
+# extraPaths = ["../pystruct3d/"]
+
+[tool.uv.sources]
+pystruct3d = { workspace = true }
