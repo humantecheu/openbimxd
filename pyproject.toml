@@ -19,7 +19,6 @@ authors = [
 dependencies = [
     "ifcopenshell",
     "numpy",
-    "open3d",
     "pystruct3d @ https://github.com/humantecheu/pystruct3d.git",
     "scipy",
 ]

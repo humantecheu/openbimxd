@@ -25,8 +25,8 @@
 import ifcopenshell
 import ifcopenshell.geom
 import numpy as np
-import open3d as o3d
 from pystruct3d.bbox import bbox
+from pystruct3d.io.readers import read_point_cloud
 from pystruct3d.visualization import Visualizer
 from scipy.spatial import ConvexHull
 
@@ -54,9 +54,8 @@ class IfcToLabel:
         """
         self.offset = offset
         self.ifc_model = ifcopenshell.open(ifc_file)
-        self.pcd = o3d.io.read_point_cloud(pcd_file)
-        num_points = np.shape(np.asarray(self.pcd.points))[0]
-        self.labels = np.zeros((num_points, 2))
+        self.xyz, self.rgb = read_point_cloud(pcd_file)
+        self.labels = np.zeros((len(self.xyz), 2))
         self.visu = Visualizer()
 
     def get_inliers(self, ifc_element) -> tuple[np.ndarray, np.ndarray]:
@@ -79,7 +78,7 @@ class IfcToLabel:
         ifc_bx.bbox_from_verts(verts)
         ifc_bx.expand(self.offset)
         element_pts, indices = ifc_bx.points_in_bbox_probability(
-            np.asarray(self.pcd.points)
+            self.xyz
         )
         # visualize vertices
         orig_shape = verts.shape[0]
@@ -114,7 +113,7 @@ class IfcToLabel:
             # Get array of boolean values indicating in hull if True
             in_hull = np.all(
                 np.add(
-                    np.dot(np.asarray(self.pcd.points), hull.equations[:, :-1].T),
+                    np.dot(self.xyz, hull.equations[:, :-1].T),
                     hull.equations[:, -1],
                 )
                 <= self.offset,
@@ -122,7 +121,7 @@ class IfcToLabel:
             )  # tolerance could be set to zero, not tested
 
             # Get the actual points inside the box
-            points_in_conv_hull = np.asarray(self.pcd.points)[in_hull]
+            points_in_conv_hull = self.xyz[in_hull]
             indices = np.where(in_hull == True)[0]
 
             return points_in_conv_hull, indices
@@ -192,7 +191,7 @@ def main():
 
     Args:
         ifc_fname (string): IFC file name
-        pcd_fname (string): Point cloud file name. Only open3d compatible formats work
+        pcd_fname (string): Point cloud file name. Open3D-compatible formats (PCD, PLY, XYZ, etc.)
         offset (float): offset for point to geometry assignment. The higher, the more coarse
         the labels
     """
@@ -207,8 +206,8 @@ def main():
     # get_labels.visualize()
     print(np.unique(get_labels.labels))
     point_cloud_array = np.hstack((
-        np.asarray(get_labels.pcd.points),
-        np.asarray(get_labels.pcd.colors),
+        get_labels.xyz,
+        get_labels.rgb,
         get_labels.labels,
     ))
     print(point_cloud_array.shape)
