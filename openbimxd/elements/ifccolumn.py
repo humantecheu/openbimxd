@@ -132,6 +132,6 @@ class IfcColumn:
         settings.set("use-world-coords", True)
         # retrieve shape
         shape = ifcopenshell.geom.create_shape(settings, self.column)
-        verts = np.asarray(shape.geometry.verts)
+        verts = np.asarray(shape.geometry.verts)  # ty: ignore[unresolved-attribute]
 
         return verts

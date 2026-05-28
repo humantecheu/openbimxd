@@ -72,14 +72,12 @@ class IfcToLabel:
         settings = ifcopenshell.geom.settings()
         settings.set(settings.USE_WORLD_COORDS, True)
         shape = ifcopenshell.geom.create_shape(settings, ifc_element)
-        verts = np.asarray(shape.geometry.verts)
+        verts = np.asarray(shape.geometry.verts)  # ty: ignore[unresolved-attribute]
         # generate a bbox from the vertices
         ifc_bx = bbox.BBox()
         ifc_bx.bbox_from_verts(verts)
         ifc_bx.expand(self.offset)
-        element_pts, indices = ifc_bx.points_in_bbox_probability(
-            self.xyz
-        )
+        element_pts, indices = ifc_bx.points_in_bbox_probability(self.xyz)
         # visualize vertices
         orig_shape = verts.shape[0]
         verts_reshape = verts.reshape((int(orig_shape / 3), 3))
@@ -103,7 +101,7 @@ class IfcToLabel:
         settings = ifcopenshell.geom.settings()
         settings.set(settings.USE_WORLD_COORDS, True)
         shape = ifcopenshell.geom.create_shape(settings, ifc_element)
-        verts = np.asarray(shape.geometry.verts)
+        verts = np.asarray(shape.geometry.verts)  # ty: ignore[unresolved-attribute]
         orig_shape = verts.shape[0]
         verts = verts.reshape((int(orig_shape / 3), 3))
         try:
@@ -122,10 +120,10 @@ class IfcToLabel:
 
             # Get the actual points inside the box
             points_in_conv_hull = self.xyz[in_hull]
-            indices = np.where(in_hull == True)[0]
+            indices = np.where(in_hull)[0]
 
             return points_in_conv_hull, indices
-        except:
+        except Exception:
             print("-- trying to construct empty convex hull, passing ...")
             return np.empty((0,)), np.empty((0,))
 

@@ -28,8 +28,6 @@ from ifcopenshell import entity_instance
 from ifcopenshell.api import run
 from ifcopenshell.util import element, placement
 
-from openbimxd.ifcmaterial import ifcmaterial
-
 
 class UpdateIfcObject:
     """
@@ -137,8 +135,6 @@ def main():
     ifc_mdl = ifcopenshell.open("baubot_demo.ifc")
     # get the first wall in the model
     ifc_robot = ifc_mdl.by_guid("34tooC1TvAbQnDhok8tUWM")
-    ifc_mats = ifcmaterial.IfcMaterials(ifc_mdl)
-
     update = UpdateIfcObject(ifc_mdl, ifc_robot)
     update.update_location(np.asarray([5.0, 2.0, 0.0]), 90.0)
     # update.update_material(ifc_mats.clt)

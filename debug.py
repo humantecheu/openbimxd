@@ -26,7 +26,6 @@
 import ifcopenshell
 import ifcopenshell.geom
 import numpy as np
-import open3d as o3d
 from pystruct3d.bbox import bbox
 from pystruct3d.visualization import Visualizer
 
@@ -87,7 +86,7 @@ def walls_test(test_angle):
     settings = ifcopenshell.geom.settings()
     settings.set(settings.USE_WORLD_COORDS, True)
     shape = ifcopenshell.geom.create_shape(settings, wall.wall)
-    verts = np.asarray(shape.geometry.verts)
+    verts = np.asarray(shape.geometry.verts)  # ty: ignore[unresolved-attribute]
     # generate a bbox from the vertices
     ifc_bx = bbox.BBox()
     ifc_bx.bbox_from_verts(verts)

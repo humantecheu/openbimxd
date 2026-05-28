@@ -35,7 +35,7 @@ class IfcConvertOpening:
                     child.ObjectPlacement
                 )[:, 3][:3]
                 shape = ifcopenshell.geom.create_shape(settings, child)
-                verts = np.asarray(shape.geometry.verts)
+                verts = np.asarray(shape.geometry.verts)  # ty: ignore[unresolved-attribute]
                 bx = bbox.BBox().bbox_from_verts(verts)
 
                 orig_distances = child_placement - wall_placement
