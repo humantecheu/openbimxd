@@ -5,7 +5,8 @@ import ifcopenshell.geom
 import ifcopenshell.util.element
 import ifcopenshell.util.placement
 import numpy as np
-from pystruct3d.bbox import bbox
+
+from openbimxd.geometry import bbox_from_ifc_verts
 
 
 class IfcConvertOpening:
@@ -36,7 +37,7 @@ class IfcConvertOpening:
                 )[:, 3][:3]
                 shape = ifcopenshell.geom.create_shape(settings, child)
                 verts = np.asarray(shape.geometry.verts)  # ty: ignore[unresolved-attribute]
-                bx = bbox.BBox().bbox_from_verts(verts)
+                bx = bbox_from_ifc_verts(verts)
 
                 orig_distances = child_placement - wall_placement
 

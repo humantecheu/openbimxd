@@ -25,10 +25,11 @@
 import ifcopenshell
 import ifcopenshell.geom
 import numpy as np
-from pystruct3d.bbox import bbox
 from pystruct3d.io.readers import read_point_cloud
 from pystruct3d.visualization import Visualizer
 from scipy.spatial import ConvexHull
+
+from openbimxd.geometry import bbox_from_ifc_verts
 
 
 class IfcToLabel:
@@ -74,8 +75,7 @@ class IfcToLabel:
         shape = ifcopenshell.geom.create_shape(settings, ifc_element)
         verts = np.asarray(shape.geometry.verts)  # ty: ignore[unresolved-attribute]
         # generate a bbox from the vertices
-        ifc_bx = bbox.BBox()
-        ifc_bx.bbox_from_verts(verts)
+        ifc_bx = bbox_from_ifc_verts(verts)
         ifc_bx.expand(self.offset)
         element_pts, indices = ifc_bx.points_in_bbox_probability(self.xyz)
         # visualize vertices

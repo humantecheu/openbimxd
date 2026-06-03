@@ -30,6 +30,7 @@ from pystruct3d.bbox import bbox
 from pystruct3d.visualization import Visualizer
 
 from openbimxd.elements import ifccolumn, ifcdoor, ifcwall
+from openbimxd.geometry import bbox_from_ifc_verts
 from openbimxd.ifcfile import ifcfile
 from openbimxd.ifcmaterial import ifcmaterial
 
@@ -88,8 +89,7 @@ def walls_test(test_angle):
     shape = ifcopenshell.geom.create_shape(settings, wall.wall)
     verts = np.asarray(shape.geometry.verts)  # ty: ignore[unresolved-attribute]
     # generate a bbox from the vertices
-    ifc_bx = bbox.BBox()
-    ifc_bx.bbox_from_verts(verts)
+    ifc_bx = bbox_from_ifc_verts(verts)
 
     print(f"Ifc Box angle: {ifc_bx.angle()}")
 
