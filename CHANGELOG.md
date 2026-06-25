@@ -3,6 +3,20 @@
 All notable changes to openbimxd are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.5.1] - 2026-06-25
+
+### Added
+- pdoc added to dev dependencies for documentation generation
+
+### Changed
+- Project description updated in `pyproject.toml`
+- Google docstring convention enforced via `[tool.ruff.lint.pydocstyle] convention = "google"`; `"D"` removed from the global ignore list
+- All class, method, and module docstrings rewritten in Google style (one-liner class descriptions, `Args:`/`Returns:` sections with punctuation)
+
+### Fixed
+- Missing MIT SPDX header in `debug.py`
+- Missing SPDX header and docstrings in `parsers/ht_demolition_ontology.py`
+
 ## [0.5.0] - 2026-06-25
 
 ### Added
