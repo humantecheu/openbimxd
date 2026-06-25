@@ -1,26 +1,5 @@
-# openbimxd - open source tools to interact with IFC files
-# Copyright (C) 2024, 2024 the HumanTech project
-# Main contributors: Fabian Kaufmann fabian.kaufmann@rptu.de
-#           Marius Schellen marius.schellen@rptu.de
-#           Mahdi Chamseddine mahdi.chamseddine@dfki.de
-#
-# This file is part of openbimxd
-#
-# openbimxd is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# openbimxd is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with openbimxd.  If not, see <http://www.gnu.org/licenses/>.
-#
-# This project uses IfcOpenShell <https://blenderbim.org/>, all credits to
-# Dion Moult for his great work
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024 the HumanTech project
 
 
 import time
@@ -35,13 +14,13 @@ import ifcopenshell.util.selector
 from ifcopenshell import file
 
 
-class objectFilter:
+class ObjectFilter:
     """
     A class to filter objects based on their IFC class, attributes, semantic and spatial relationships.
 
     Methods
         __init__(self, ifc_model_path: str, filtered_model_path: str) -> None
-            Initialize the objectFilter object
+            Initialize the ObjectFilter object
         filter_objects(self, search_str: str)
             Filter objects with a given search string. Uses the IfcOpenShell selector
             syntax: https://blenderbim.org/docs-python/ifcopenshell-python/selector_syntax.html
@@ -243,7 +222,7 @@ class objectFilter:
             # fix ThermalTransmittance in IFC2X3 breaking
             if (
                 self.filtered_model.schema == "IFC2X3"
-                and "ThermalTransmittance" in p_dict.keys()
+                and "ThermalTransmittance" in p_dict
             ):
                 print(
                     "Set ThermalTransmittance value to None in IFC2X3 to avoid errors"
@@ -293,7 +272,7 @@ def main():
     # scene = (
     # "/home/kaufmann/Desktop/ifcs_from_hell/SCE-ZBG-BI-9-M211-A0-XXX-00-00-P-0.ifc"
     # )
-    of = objectFilter(scene, f"{scene[:-4]}_filtered.ifc")
+    of = ObjectFilter(scene, f"{scene[:-4]}_filtered.ifc")
     of.filter_objects("IfcSlab, IfcBeam")
     of.export_model()
     execution_time = time.perf_counter() - start

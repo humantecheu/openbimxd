@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import ifcopenshell
 import ifcopenshell.geom
@@ -59,7 +60,7 @@ class IfcConvertOpening:
     def to_json(self):
         json_data = json.dumps(self.data_dict)
 
-        with open(f"{self.ifc_file[:-4]}.json", "w") as json_file:
+        with Path(f"{self.ifc_file[:-4]}.json").open("w") as json_file:
             json_file.write(json_data)
 
         return self

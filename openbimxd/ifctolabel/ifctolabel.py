@@ -1,33 +1,12 @@
-# openbimxd - open source tools to interact with IFC files
-# Copyright (C) 2024, 2024 the HumanTech project
-# Main contributors: Fabian Kaufmann fabian.kaufmann@rptu.de
-#           Marius Schellen marius.schellen@rptu.de
-#           Mahdi Chamseddine mahdi.chamseddine@dfki.de
-#
-# This file is part of openbimxd
-#
-# openbimxd is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# openbimxd is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with openbimxd.  If not, see <http://www.gnu.org/licenses/>.
-#
-# This project uses IfcOpenShell <https://blenderbim.org/>, all credits to
-# Dion Moult for his great work
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024 the HumanTech project
 
 import ifcopenshell
 import ifcopenshell.geom
 import numpy as np
 from pystruct3d.io.readers import read_point_cloud
 from pystruct3d.visualization import Visualizer
-from scipy.spatial import ConvexHull
+from scipy.spatial import ConvexHull, QhullError
 
 from openbimxd.geometry import bbox_from_ifc_verts
 
@@ -77,7 +56,7 @@ class IfcToLabel:
         # generate a bbox from the vertices
         ifc_bx = bbox_from_ifc_verts(verts)
         ifc_bx.expand(self.offset)
-        element_pts, indices = ifc_bx.points_in_bbox_probability(self.xyz)
+        element_pts, indices = ifc_bx.points_in_bbox(self.xyz)
         # visualize vertices
         orig_shape = verts.shape[0]
         verts_reshape = verts.reshape((int(orig_shape / 3), 3))
@@ -123,7 +102,7 @@ class IfcToLabel:
             indices = np.where(in_hull)[0]
 
             return points_in_conv_hull, indices
-        except Exception:
+        except (QhullError, ValueError):
             print("-- trying to construct empty convex hull, passing ...")
             return np.empty((0,)), np.empty((0,))
 
