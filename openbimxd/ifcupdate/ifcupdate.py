@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2024 the HumanTech project
 
+"""Update an IFC object's placement, material, or property sets."""
+
 import ifcopenshell
 import numpy as np
 from ifcopenshell import entity_instance
@@ -9,43 +11,36 @@ from ifcopenshell.util import element, placement
 
 
 class UpdateIfcObject:
-    """
-    A class to update IFC objects. The updated objects are saved as a new file.
-
-    Attributes:
-        model: IFC model, open it using ifcopenshell.open()
-        ifc_object: specific IFC object. Use IfcOpenShell to select an object.
-    """
+    """Update an IFC object's placement, material, or property sets."""
 
     def __init__(
         self,
         model: ifcopenshell.file,
         ifc_object: entity_instance,
     ) -> None:
-        """Initialize UpdateIfcObject object
+        """Initialise with an open IFC model and the object to update.
 
         Args:
-            model (ifcopenshell.file): IFC model
-            ifc_object (ifcopenshell.main.ifcopenshell_wrapper.Element): subclass of IfcElement
+            model: Open IFC model (``ifcopenshell.open()``).
+            ifc_object: The specific IFC element to update.
         """
         self.model = model
         self.ifc_object = ifc_object
 
     def __str__(self) -> str:
-        """Print string
+        """Return a human-readable description of this updater.
 
         Returns:
-            string: String to be printed when print()
+            String identifying the model being updated.
         """
         return f"I will update the model {self.model}"
 
     def update_location(self, origin: np.ndarray, angle: float) -> None:
-        """Update the location and angle of an the IfcLocalPlacement.
+        """Update the IfcLocalPlacement of the object.
 
         Args:
-            origin (np.ndarray): New origin, shape (3,)
-            angle (float): Angle for rotation in degrees. Counter-clockwise
-                            is positive
+            origin: New origin coordinates, shape ``(3,)``.
+            angle: Rotation angle in degrees (counter-clockwise is positive).
         """
         # new placement unit matrix at (0, 0, 0)
         matrix = np.eye(4)
@@ -61,10 +56,10 @@ class UpdateIfcObject:
         )
 
     def update_material(self, ifc_material) -> None:
-        """Update the IfcMaterial.
+        """Replace the material assigned to the object.
 
         Args:
-            ifc_material (IfcMaterial): Ifc Material
+            ifc_material: New IfcMaterial to assign.
         """
         run(
             "material.assign_material",
@@ -75,16 +70,17 @@ class UpdateIfcObject:
         )
 
     def update_property(self, pset_name: str, pset_dict: dict) -> None:
-        """Updates the property set of an object. Either adds a new property
-        set or updates the existing one, if one with same name as existing
-        is given.
+        """Add or update a property set on the object.
+
+        If the object already has one property set it is updated; if it has more
+        than one, a message is printed and no change is made.
 
         Args:
-            pset_name (str): Name of the property set. Note, that Pset_ is reserved for
-            property sets in the IFC standard, so name yours differently.
-            pset_dict (dict): Dictionary with new properties. Key is name of
-            property, value is value of property. Note, that python data types
-            are transferred into IFC data types, but this could be ambiguous.
+            pset_name: Name of the property set.  Avoid the ``Pset_`` prefix
+                (reserved by the IFC standard for standard property sets).
+            pset_dict: Property name-to-value mapping.  Python types are
+                converted to IFC types automatically, though this may be
+                ambiguous in edge cases.
         """
         psets = element.get_psets(self.ifc_object)
         print(f"Ifc Class of element: {self.ifc_object.get_info().get('type')}")
@@ -104,11 +100,12 @@ class UpdateIfcObject:
             )
 
     def write(self) -> None:
-        """Write the updated model"""
+        """Write the updated model to a file."""
         self.model.write("baubot_demo_update.ifc")
 
 
 def main():
+    """Load a demo IFC file, apply a location update, and write the result."""
     ifc_mdl = ifcopenshell.open("baubot_demo.ifc")
     # get the first wall in the model
     ifc_robot = ifc_mdl.by_guid("34tooC1TvAbQnDhok8tUWM")

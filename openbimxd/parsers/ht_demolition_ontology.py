@@ -1,3 +1,8 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024 the HumanTech project
+
+"""Extract IFC opening geometry parameters and serialize them to JSON."""
+
 import json
 from pathlib import Path
 
@@ -11,7 +16,14 @@ from openbimxd.geometry import bbox_from_ifc_verts
 
 
 class IfcConvertOpening:
+    """Extract opening geometry parameters from an IFC model."""
+
     def __init__(self, ifc_file) -> None:
+        """Open an IFC file and locate the first wall for opening extraction.
+
+        Args:
+            ifc_file: Path to the IFC file.
+        """
         self.ifc_file = ifc_file
         self.ifc = ifcopenshell.open(ifc_file)
         self.ifc_walls = self.ifc.by_type("IfcWall")
@@ -23,6 +35,11 @@ class IfcConvertOpening:
         }
 
     def get_parameters(self):
+        """Extract position and dimension parameters for each opening in the wall.
+
+        Returns:
+            IfcConvertOpening: ``self``, for method chaining.
+        """
         wall_placement = ifcopenshell.util.placement.get_local_placement(
             self.ifc_wall.ObjectPlacement
         )[:, 3][:3]
@@ -58,6 +75,11 @@ class IfcConvertOpening:
         return self
 
     def to_json(self):
+        """Serialize the extracted parameters to a JSON file next to the IFC file.
+
+        Returns:
+            IfcConvertOpening: ``self``, for method chaining.
+        """
         json_data = json.dumps(self.data_dict)
 
         with Path(f"{self.ifc_file[:-4]}.json").open("w") as json_file:
@@ -67,6 +89,7 @@ class IfcConvertOpening:
 
 
 def main():
+    """Run parameter extraction on the demo IFC file."""
     IfcConvertOpening("AC20-FZK-Haus.ifc").get_parameters().to_json()
 
 

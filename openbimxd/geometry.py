@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2024 the HumanTech project
 
+"""Utilities for fitting bounding boxes to IfcOpenShell vertex arrays."""
+
 from __future__ import annotations
 
 import numpy as np

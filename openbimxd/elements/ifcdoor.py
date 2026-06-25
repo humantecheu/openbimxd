@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2024 the HumanTech project
 
+"""Create IfcDoor elements in an IFC model."""
 
 import ifcopenshell.api.feature
 import ifcopenshell.api.geometry
@@ -11,26 +12,13 @@ import numpy as np
 
 
 class IfcDoor:
-    """
-    A class to create an IfcDoor
-
-    Attributes:
-        ifc_model : IfcModelBuilder object
-
-    Methods:
-        create_door
-            Create a generic box-style door geometry representation. Assign the door
-            to a building storey.
-        get_verts
-            Get the vertices of the geometry representation.
-    """
+    """Create an IfcDoor in an IFC model from a bounding box."""
 
     def __init__(self, ifc_model) -> None:
-        """Initialize IfcDoor object. Creates an empty IfcDoor in the IFC model
-        given as input.
+        """Create an empty IfcDoor entity in the IFC model.
 
         Args:
-            ifc_model (ifcopenshell.file): The IFC file the IfcWall will be added to
+            ifc_model: IfcModelBuilder instance the door will be added to.
         """
         self.door = ifcopenshell.api.root.create_entity(
             ifc_model.model,
@@ -39,13 +27,12 @@ class IfcDoor:
         self.ifc_model = ifc_model
 
     def create_door(self, wall, bx, uid=None) -> None:
-        """Create door placement, representation and opening and assign door to
-        building storey
+        """Create door placement, representation, and opening; assign to building storey.
 
         Args:
-            wall (IfcWall): object of IFC wall class, parent object
-            bx (bbox): reconstructed door geometry
-            uid (guid, optional): Use specific uid in case of update. Defaults to None.
+            wall: IfcWall instance that is the parent object.
+            bx: Bounding box defining the door geometry.
+            uid: Optional GUID to use instead of generating a new one.
         """
         print("-- creating IFC door")
         # set uid if given
@@ -118,10 +105,10 @@ class IfcDoor:
         )
 
     def get_verts(self) -> np.ndarray:
-        """Get the vertices i.e., all corner points of the geometry representation
+        """Return all corner vertices of the geometry representation.
 
         Returns:
-            verts: np.ndarray
+            Flat vertex array of shape ``(n,)``.
         """
         # ifc geom settings for ifc box visualization
         settings = ifcopenshell.geom.settings()

@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2024 the HumanTech project
 
+"""Filter IFC objects by class, attributes, and spatial relationships."""
 
 import time
 
@@ -15,37 +16,14 @@ from ifcopenshell import file
 
 
 class ObjectFilter:
-    """
-    A class to filter objects based on their IFC class, attributes, semantic and spatial relationships.
-
-    Methods
-        __init__(self, ifc_model_path: str, filtered_model_path: str) -> None
-            Initialize the ObjectFilter object
-        filter_objects(self, search_str: str)
-            Filter objects with a given search string. Uses the IfcOpenShell selector
-            syntax: https://blenderbim.org/docs-python/ifcopenshell-python/selector_syntax.html
-        create_materials(self):
-            Gets all materials from original file and adds them to the filtered file
-        assign_container(self, obj, new_obj)
-            Assigns the spatioal container e.g., the building storey of an object
-        assign_opening(self, obj, new_obj)
-            Gets and assigns all openings of a parent object. Only the openings, no elements
-            inside the opening such as windows, doors, etc.
-        assign_material(self, obj, new_obj, new_mats, new_mat_sets)
-            Assigns the materials created in create_materials() to the filtered objects
-        assign_psets(self, obj, new_obj)
-            Gets and assigns property sets. This is sensitive to IFC schema versions, so be
-            careful!
-        export_model(self)
-            Executes the filtering and assignments and saves the filtered model.
-    """
+    """Filter IFC objects by class, attributes, and spatial relationships."""
 
     def __init__(self, ifc_model_path: str, filtered_model_path: str) -> None:
-        """Initialize IfcModelBuilder
+        """Set up the source model and an empty filtered model with matching hierarchy.
 
         Args:
-            ifc_model_path (str): path to the model file
-            filtered_model_path (str): path to the filtered model file
+            ifc_model_path: Path to the source IFC file.
+            filtered_model_path: Path where the filtered IFC file will be written.
         """
         self.ifc_model = ifcopenshell.open(ifc_model_path)
         self.filtered_model_path = filtered_model_path
@@ -83,14 +61,14 @@ class ObjectFilter:
                     )
 
     def filter_objects(self, search_str: str):
-        """Filter objects of a specific class and other attributes and properties.
-        Uses the IfcOpenShell selector class.
-        Typical search_str: "IfcWall", ore more advanced: "IfcWall, Name=FOO"
-        Options for search strings:
-        https://blenderbim.org/docs-python/ifcopenshell-python/selector_syntax.html
+        """Filter objects using an IfcOpenShell selector expression.
+
+        Typical search strings: ``"IfcWall"``, ``"IfcWall, Name=FOO"``.
+        See the full syntax at
+        https://blenderbim.org/docs-python/ifcopenshell-python/selector_syntax.html.
 
         Args:
-            search_str (str): string with search parameters: IFC Class, name, ...
+            search_str: Selector expression (IFC class, name, properties, …).
         """
         self.objects = ifcopenshell.util.selector.filter_elements(
             self.ifc_model,
@@ -101,10 +79,11 @@ class ObjectFilter:
         # TODO: useful for getting child elements
 
     def create_materials(self):
-        """Get all materials from the original file and add them to the filtered file
+        """Copy all materials from the source model into the filtered model.
 
         Returns:
-            dict: new materials and new material sets
+            tuple[dict, dict]: Mapping of material name to new material, and
+            mapping of layer-set name to new material layer set.
         """
         new_mats = {}
         for m in self.materials:
@@ -117,11 +96,11 @@ class ObjectFilter:
         return new_mats, new_mat_sets
 
     def assign_container(self, obj, new_obj) -> None:
-        """Assign spatial container from the old object to the filtered object
+        """Assign the spatial container from the source object to the filtered copy.
 
         Args:
-            obj (IfcElement): element in the original file
-            new_obj (IfcElement): filtered element in the filtered file
+            obj: Element in the original file.
+            new_obj: Corresponding element in the filtered file.
         """
         container = ifcopenshell.util.element.get_container(obj)
         if container is None:
@@ -142,11 +121,11 @@ class ObjectFilter:
         )
 
     def assign_opening(self, obj, new_obj):
-        """Add openings to parent elements
+        """Copy IfcOpeningElement children from the source object to the filtered copy.
 
         Args:
-            obj (IfcElement): element in the original file
-            new_obj (IfcElement): filtered element in the filtered file
+            obj: Element in the original file.
+            new_obj: Corresponding element in the filtered file.
         """
         child_objects = ifcopenshell.util.element.get_decomposition(obj)
         for child in child_objects:
@@ -159,14 +138,13 @@ class ObjectFilter:
                 )
 
     def assign_material(self, obj, new_obj, new_mats, new_mat_sets) -> None:
-        """Assign materials to the filtered elements. Materials or material layer sets
-        are retrieved from the original objects.
+        """Assign the material or material layer set from the source to the filtered copy.
 
         Args:
-            obj (IfcElement): element in the original file
-            new_obj (IfcElement): filtered element in the filtered file
-            new_mats (dict): dictionary with new materials
-            new_mat_sets (dict): dictionary with new material layer sets
+            obj: Element in the original file.
+            new_obj: Corresponding element in the filtered file.
+            new_mats: Mapping of material name to filtered-model material.
+            new_mat_sets: Mapping of layer-set name to filtered-model layer set.
         """
         # BUG: get material layer sets
         material = ifcopenshell.util.element.get_material(obj)
@@ -201,11 +179,11 @@ class ObjectFilter:
             )
 
     def assign_psets(self, obj, new_obj) -> None:
-        """Add and assign psets
+        """Copy property sets from the source object to the filtered copy.
 
         Args:
-            obj (IfcElement): element in the original file
-            new_obj (IfcElement): filtered element in the filtered file
+            obj: Element in the original file.
+            new_obj: Corresponding element in the filtered file.
         """
         # get property set from old
         psets = ifcopenshell.util.element.get_psets(obj)
@@ -243,7 +221,7 @@ class ObjectFilter:
                 )
 
     def export_model(self) -> None:
-        """Execute filtering and save filtered model to IFC file"""
+        """Run filtering assignments and write the result to the configured output path."""
         new_mats, new_mat_sets = self.create_materials()
         for i, obj in enumerate(self.objects):
             # if obj.is_a("IfcElementAssembly"):
@@ -263,6 +241,7 @@ class ObjectFilter:
 
 
 def main():
+    """Run a demo filtering pass on a hard-coded IFC scene."""
     start = time.perf_counter()
     # /home/kaufmann/Desktop/ifcs_from_hell/SCE-ZBG-BI-9-M211-A0-XXX-00-00-P-0.ifc
     scene = "HT_DFKI_BA3_4thfloor.ifc"

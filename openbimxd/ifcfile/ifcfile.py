@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2024 the HumanTech project
 
+"""Build IFC models with a project/site/building/storey hierarchy."""
+
 import ifcopenshell
 import ifcopenshell.api.aggregate
 import ifcopenshell.api.context
@@ -11,18 +13,7 @@ from ifcopenshell.util.schema import IFC_SCHEMA
 
 
 class IfcModelBuilder:
-    """
-    A class to create an IFC model with a basic hierarchy.
-
-    Attributes:
-        filename (str): Path to write the file to
-        project_name (str): optional, name of the IfcProject
-        site_name (str): optional, name of the IfcSite
-        building_name (str): optional, name of the IfcBuilding
-        storey_name (str): optional, name of the IfcBuildingStorey
-        schema (IFC_SCHEMA): optional, identifies the IFC schema. Typically IFC2X3 or IFC4
-
-    """
+    """Build an IFC model with project/site/building/storey hierarchy."""
 
     def __init__(
         self,
@@ -33,19 +24,16 @@ class IfcModelBuilder:
         storey_name: str = "Level 0",
         schema: IFC_SCHEMA = "IFC4",
     ) -> None:
+        """Create an IFC model with a full spatial hierarchy.
+
+        Args:
+            filename: Path the IFC file will be written to.
+            project_name: Name of the IfcProject entity.
+            site_name: Name of the IfcSite entity.
+            building_name: Name of the IfcBuilding entity.
+            storey_name: Name of the IfcBuildingStorey entity.
+            schema: IFC schema version, typically ``"IFC2X3"`` or ``"IFC4"``.
         """
-        Constructs an IfcModelBuilder object
-
-        Attributes:
-            filename (str): Path to write the file to
-            project_name (str): optional, name of the IfcProject
-            site_name (str): optional, name of the IfcSite
-            building_name (str): optional, name of the IfcBuilding
-            storey_name (str): optional, name of the IfcBuildingStorey
-            schema (str): optional, identifies the IFC schema. Typically IFC2X3 or IFC4
-
-        """
-
         self.filename = filename
         self.project_name = project_name
         self.site_name = site_name

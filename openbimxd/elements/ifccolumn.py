@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2024 the HumanTech project
 
+"""Create IfcColumn elements in an IFC model."""
 
 import ifcopenshell.api.geometry
 import ifcopenshell.api.root
@@ -11,25 +12,13 @@ import numpy as np
 
 
 class IfcColumn:
-    """
-    A class to create an IfcColumn
-
-    Attributes:
-        ifc_model : IfcModelBuilder object
-
-    Methods:
-        create
-            Create the column geometry representation, assign the column to a building
-            storey.
-        get_verts
-            Get the vertices of the geometry representation.
-    """
+    """Create an IfcColumn in an IFC model from a bounding box."""
 
     def __init__(self, ifc_model) -> None:
-        """Initialize IfcColumn. Creates an empty IfcColumn object into the Ifc model.
+        """Create an empty IfcColumn entity in the IFC model.
 
         Args:
-            ifc_model (ifcfile): Ifc Model to create column into
+            ifc_model: IfcModelBuilder instance to add the column to.
         """
         self.ifc_model = ifc_model
         self.column = ifcopenshell.api.root.create_entity(
@@ -38,14 +27,13 @@ class IfcColumn:
         )
 
     def create(self, bx, shape="square", **kwargs) -> None:
-        """Creates round and square columns
-
-        Kwargs:
-            radius (float): Radius of round column, in mms
+        """Create round or square column geometry and assign it to the building storey.
 
         Args:
-            bx (bbox): Bounding box. Should be presented for either shape of column
-            shape (str, optional): "round" or "square". Defaults to "square".
+            bx: Bounding box defining the column extent.
+            shape: Profile shape — ``"square"`` (default) or ``"round"``.
+            **kwargs: Additional profile parameters.  For ``shape="round"``,
+                ``radius`` (float, metres) sets the circle radius (default 0.3).
         """
         matrix = np.eye(4)
         matrix = ifcopenshell.util.placement.rotation(bx.angle(), "Z") @ matrix
@@ -99,10 +87,10 @@ class IfcColumn:
         )
 
     def get_verts(self) -> np.ndarray:
-        """Get the vertices i.e., all corner points of the geometry representation
+        """Return all corner vertices of the geometry representation.
 
         Returns:
-            verts: np.ndarray
+            Flat vertex array of shape ``(n,)``.
         """
         # ifc geom settings for ifc box visualization
         settings = ifcopenshell.geom.settings()

@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2024 the HumanTech project
 
+"""Assign semantic labels to a point cloud using IFC element geometry."""
+
 import ifcopenshell
 import ifcopenshell.geom
 import numpy as np
@@ -12,25 +14,15 @@ from openbimxd.geometry import bbox_from_ifc_verts
 
 
 class IfcToLabel:
-    """
-    A class to assign semantic labels from IFC objects to a point cloud.
-
-    Attributes:
-        ifc_file (string): path/to/IfcFile
-        pcd_file (string): path to point cloud
-        offset (flaot): controls the extension of the search volume (bounding box)
-        in either direction.
-    """
+    """Assign semantic labels to a point cloud using IFC element geometry."""
 
     def __init__(self, ifc_file, pcd_file, offset) -> None:
-        """Constructor for IfcToLabel. Reads the IFC an point cloud file, initializes
-        the label array of shape (number of points, 2), creates visualization object
+        """Open the IFC and point cloud files and initialise the label array.
 
         Args:
-            ifc_file (string): path/to/IfcFile
-            pcd_file (string): path to point cloud
-            offset (flaot): controls the extension of the search volume (bounding box)
-            in either direction.
+            ifc_file: Path to the IFC file.
+            pcd_file: Path to the point cloud file (PCD, PLY, XYZ, …).
+            offset: Expansion applied to each bounding box search volume (metres).
         """
         self.offset = offset
         self.ifc_model = ifcopenshell.open(ifc_file)
@@ -39,15 +31,14 @@ class IfcToLabel:
         self.visu = Visualizer()
 
     def get_inliers(self, ifc_element) -> tuple[np.ndarray, np.ndarray]:
-        """Creates a bounding box from the IFC geometry, return all inliers
+        """Fit a bounding box to an IFC element and return all point-cloud inliers.
 
         Args:
-            ifc_element (IFC element): IFC element such as wall, door, window. The
-            element needs to hold a geometry representation
+            ifc_element: IFC element with a geometry representation (wall, door, …).
 
         Returns:
-            np.ndarray : inlier points (n, 3)
-            np.ndarray : indices of inlier points (n, )
+            tuple[np.ndarray, np.ndarray]: Inlier points of shape ``(n, 3)`` and
+            their indices of shape ``(n,)``.
         """
         settings = ifcopenshell.geom.settings()
         settings.set(settings.USE_WORLD_COORDS, True)
@@ -67,15 +58,17 @@ class IfcToLabel:
         return element_pts, indices
 
     def get_inliers_conv_hull(self, ifc_element) -> tuple[np.ndarray, np.ndarray]:
-        """Create a convex hull around the geometry of an IFC element, get all inliers.
-        Typically used for more complex non-box shapes e.g., slabs.
+        """Build a convex hull around IFC element geometry and return all inliers.
+
+        Typically used for non-box shapes such as slabs.
 
         Args:
-            ifc_element (Ifc Element): IfcSlab, needs to have geometry
+            ifc_element: IfcSlab or similar element with geometry.
 
         Returns:
-            np.ndarray: points in convex hull, shape (n, 3)
-            np.ndarray: indices of inlier points, shape (n, )
+            tuple[np.ndarray, np.ndarray]: Points inside the hull of shape ``(n, 3)``
+            and their indices of shape ``(n,)``.  Returns empty arrays if the hull
+            cannot be constructed.
         """
         settings = ifcopenshell.geom.settings()
         settings.set(settings.USE_WORLD_COORDS, True)
@@ -107,12 +100,12 @@ class IfcToLabel:
             return np.empty((0,)), np.empty((0,))
 
     def edit_labels(self, ifc_objects, semantic_label, use_conv_hull=False) -> None:
-        """Edits the labels array given a list of objects of the same class and the respective
-        semantic label.
+        """Write a semantic label for all point-cloud points inside each IFC element.
 
         Args:
-            ifc_objects (list): List of IFC elements with geometry
-            semantic_label (int): label
+            ifc_objects: List of IFC elements with geometry.
+            semantic_label: Integer label to assign to inlier points.
+            use_conv_hull: Use convex-hull inlier test instead of bounding box.
         """
         for obj in ifc_objects:
             if use_conv_hull:
@@ -134,44 +127,36 @@ class IfcToLabel:
             self.visu.add_points(obj_pts)
 
     def parse_doors(self) -> None:
-        """Parse doors, edit the label array."""
+        """Parse doors and update the label array."""
         print("Parse doors ...")
         doors = self.ifc_model.by_type("IfcDoor")
         self.edit_labels(doors, 8)
 
     def parse_windows(self) -> None:
-        """Parse windows, edit the label array."""
+        """Parse windows and update the label array."""
         print("Parse windows ...")
         windows = self.ifc_model.by_type("IfcWindow")
         self.edit_labels(windows, 11)
 
     def parse_slabs(self) -> None:
-        """Parse slabs, edit the label array."""
+        """Parse slabs and update the label array."""
         print("Parse slabs ...")
         slabs = self.ifc_model.by_type("IfcSlab")
         self.edit_labels(slabs, 1, use_conv_hull=True)
 
     def parse_walls(self) -> None:
-        """Parse walls, edit the label array."""
+        """Parse walls and update the label array."""
         print("Parse walls ...")
         walls = self.ifc_model.by_type("IfcWall")
         self.edit_labels(walls, 4)
 
     def visualize(self) -> None:
-        """Opens the visualization window."""
+        """Open the visualization window."""
         self.visu.show()
 
 
 def main():
-    """Opens IFC file and point cloud, gets labels from IFC geometry, saves
-    point cloud as ascii with XYZ RGB SemanticLabel InstanceID
-
-    Args:
-        ifc_fname (string): IFC file name
-        pcd_fname (string): Point cloud file name. Open3D-compatible formats (PCD, PLY, XYZ, etc.)
-        offset (float): offset for point to geometry assignment. The higher, the more coarse
-        the labels
-    """
+    """Open an IFC file and point cloud, assign semantic labels, and save the result."""
     ifc_fname = "HT_DFKI_BA3_4thfloor.ifc"
     pcd_fname = "DFKI_4th_floor.ply"
     offset = 0.1

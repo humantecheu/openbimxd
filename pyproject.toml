@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name            = "openbimxd"
-description     = "Add your description here"
+description     = "Open-source Python library for IFC BIM interaction and scan-to-BIM workflows"
 dynamic         = ["version"]
 readme          = "README.md"
 requires-python = ">=3.10,<3.13"
@@ -24,7 +24,13 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["pre-commit>=4.6.0", "pytest>=9.0.3", "ruff>=0.15.16", "ty>=0.0.44"]
+dev = [
+    "pdoc>=16.0.0",
+    "pre-commit>=4.6.0",
+    "pytest>=9.0.3",
+    "ruff>=0.15.16",
+    "ty>=0.0.44",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -43,7 +49,6 @@ select = ["ALL"]
 ignore = [
     "E501",    # line too long — formatter enforces line-length
     "PLR0913", # too many arguments — constructor parameters all carry meaningful defaults
-    "D",       # pydocstring formatting — existing docstrings are readable; enforce separately
     "ANN",     # type annotations — adopt gradually
     "ERA001",  # commented-out code — intentional TODOs and dev notes
     "T201",    # print — progress output; migrate to logging separately
@@ -55,5 +60,10 @@ ignore = [
     "COM812",  # trailing comma — conflicts with ruff formatter
 ]
 
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101"] # assert is idiomatic in pytest
+"tests/**"  = ["S101", "D"]        # assert is idiomatic; tests don't need docstrings
+"debug.py"  = ["D100", "D103"]     # script file — no module/function docstring required
+"main.py"   = ["D100", "D103"]     # script file — no module/function docstring required
