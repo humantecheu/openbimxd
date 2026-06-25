@@ -7,6 +7,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - pdoc added to dev dependencies for documentation generation
+- GitHub Actions CI workflow: ruff check, ruff format, ty check, pytest on push/PR to main
+- GitHub Actions docs workflow: build pdoc site and deploy to GitHub Pages on push to main
+- `openbimxd.__version__` exposed via `importlib.metadata` (required by the docs workflow)
 
 ### Changed
 - Project description updated in `pyproject.toml`
