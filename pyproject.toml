@@ -7,13 +7,13 @@ name            = "openbimxd"
 description     = "Add your description here"
 dynamic         = ["version"]
 readme          = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10,<3.13"
 license         = { file = "LICENSE" }
 
 authors = [
+    { name = "Mahdi Chamseddine", email = "mahdi.chamseddine@dfki.de" },
     { name = "Fabian Kaufmann", email = "fabian.kaufmann@rptu.de" },
     { name = "Marius Schellen", email = "marius.schellen@rptu.de" },
-    { name = "Mahdi Chamseddine", email = "mahdi.chamseddine@dfki.de" },
 ]
 
 dependencies = [
@@ -23,6 +23,12 @@ dependencies = [
     "scipy",
 ]
 
+[dependency-groups]
+dev = ["pre-commit>=4.6.0", "pytest>=9.0.3", "ruff>=0.15.16", "ty>=0.0.44"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [tool.ruff]
 exclude      = [".eggs", ".git", ".venv"]
 line-length  = 88                         # same as black
@@ -31,11 +37,23 @@ indent-width = 4
 [tool.ruff.format]
 quote-style = "double"
 preview     = true
-[tool.ty.environment]
-extra-paths = ["../pystruct3d/"]
 
-# [tool.pyright]
-# extraPaths = ["../pystruct3d/"]
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "E501",    # line too long — formatter enforces line-length
+    "PLR0913", # too many arguments — constructor parameters all carry meaningful defaults
+    "D",       # pydocstring formatting — existing docstrings are readable; enforce separately
+    "ANN",     # type annotations — adopt gradually
+    "ERA001",  # commented-out code — intentional TODOs and dev notes
+    "T201",    # print — progress output; migrate to logging separately
+    "FBT",     # boolean args — many are in ifcopenshell API calls
+    "TD002",   # missing TODO author
+    "TD003",   # missing TODO issue link
+    "FIX002",  # line contains TODO
+    "TRY300",  # consider try/except/else — style preference
+    "COM812",  # trailing comma — conflicts with ruff formatter
+]
 
-[tool.uv.sources]
-pystruct3d = { workspace = true }
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"] # assert is idiomatic in pytest
