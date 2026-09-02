@@ -2,6 +2,7 @@
 
 ![Python 3.10–3.12](https://img.shields.io/badge/python-3.10--3.12-blue.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://humantecheu.github.io/openbimxd/)
 
 OpenBIMxD is an open-source Python library for interacting with IFC BIM models as part of scan-to-BIM workflows. It provides tools for building IFC file structures from scratch, creating IFC elements from reconstructed geometry, filtering models, assigning semantic labels to point clouds from IFC geometry, and updating existing IFC objects.
 

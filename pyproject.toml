@@ -32,6 +32,9 @@ dev = [
     "ty>=0.0.44",
 ]
 
+[tool.setuptools.packages.find]
+include = ["openbimxd*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
@@ -60,10 +63,10 @@ ignore = [
     "COM812",  # trailing comma — conflicts with ruff formatter
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "D"]    # assert is idiomatic; tests don't need docstrings
+"debug.py" = ["D100", "D103"] # script file — no module/function docstring required
+"main.py"  = ["D100", "D103"] # script file — no module/function docstring required
+
 [tool.ruff.lint.pydocstyle]
 convention = "google"
-
-[tool.ruff.lint.per-file-ignores]
-"tests/**"  = ["S101", "D"]        # assert is idiomatic; tests don't need docstrings
-"debug.py"  = ["D100", "D103"]     # script file — no module/function docstring required
-"main.py"   = ["D100", "D103"]     # script file — no module/function docstring required
