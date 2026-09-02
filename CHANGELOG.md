@@ -21,6 +21,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 - Missing MIT SPDX header in `debug.py`
 - Missing SPDX header and docstrings in `parsers/ht_demolition_ontology.py`
+- CI `ruff check` failing on ruff 0.16+, which stabilised `CPY001` and `PLR0917`
+  (previously preview-only); both added to the ignore list and the dev `ruff`
+  floor raised to `>=0.16.5` so local runs match CI
 
 ## [0.5.0] - 2026-06-25
 
