@@ -10,6 +10,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - GitHub Actions CI workflow: ruff check, ruff format, ty check, pytest on push/PR to main
 - GitHub Actions docs workflow: build pdoc site and deploy to GitHub Pages on push to main
 - `openbimxd.__version__` exposed via `importlib.metadata` (required by the docs workflow)
+- Docs badge linking to the GitHub Pages site in the README
+- `[tool.setuptools.packages.find]` limiting package discovery to `openbimxd*`
 
 ### Changed
 - Project description updated in `pyproject.toml`
